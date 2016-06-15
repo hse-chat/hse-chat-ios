@@ -1,0 +1,24 @@
+PODS:
+  - JSQMessagesViewController (7.3.1):
+    - JSQSystemSoundPlayer (~> 2.0.1)
+  - JSQSystemSoundPlayer (2.0.1)
+  - ProtocolBuffers-Swift (2.4.3)
+  - ReachabilitySwift (2.3.3)
+  - Swocket (0.1.0)
+
+DEPENDENCIES:
+  - JSQMessagesViewController
+  - ProtocolBuffers-Swift
+  - ReachabilitySwift
+  - Swocket (~> 0.1.0)
+
+SPEC CHECKSUMS:
+  JSQMessagesViewController: 3847120a97a7ab3bdc701f166c59f3955f7801c7
+  JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
+  ProtocolBuffers-Swift: afbdde78be3c6af8a610d2c257d6bc88e8c7c5d4
+  ReachabilitySwift: e0f6b6f280effb47731acfaaa2d5ffe223703793
+  Swocket: c9a23d8132c56ed639e66e3347a7b4b9ac59e8f8
+
+PODFILE CHECKSUM: 5a7576b4fdf7ceee913acb76a0bd0620e551d0ce
+
+COCOAPODS: 1.0.0
