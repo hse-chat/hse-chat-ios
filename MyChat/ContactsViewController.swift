@@ -13,15 +13,39 @@ class ContactsViewController: UIViewController, UITableViewDataSource, UITableVi
     
     var filteredUsers = [String]()
     
-    let users : [String] = ["Ray Wenderlich", "NSHipster", "iOS Developer Tips", "Jameson Quave", "Natasha The Robot", "Coding Explorer", "That Thing In Swift", "Andrew Bancroft", "iAchieved.it", "Airspeed Velocity"]
+    var users : [String] = []
     
     let textCellIdentifier = "ContactCell"
     
+    
     @IBOutlet var contactsTableView: UITableView!
     var resultSearchController = UISearchController()
+    
+    @IBOutlet weak var logoutButtonHandler: UIButton!
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        let observer:NSObjectProtocol = NSNotificationCenter.defaultCenter().addObserverForName(
+            "newUser",
+            object: nil, queue: nil,
+            usingBlock: newUserHandler)
+    }
         
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
+        
+        var requestId = DataManager.getRequestIdentificator()
+        
+        
+        let observer:NSObjectProtocol = NSNotificationCenter.defaultCenter().addObserverForName(
+            requestId.notificationName,
+            object: nil, queue: nil,
+            usingBlock: getUsersHandler)
+        
+        DataManager.getUsers(requestId.id)
+        
         
         if #available(iOS 9.0, *) {
             self.resultSearchController.loadViewIfNeeded()// iOS 9
@@ -67,6 +91,20 @@ class ContactsViewController: UIViewController, UITableViewDataSource, UITableVi
         }
     }
     
+    override func prepareForSegue(segue: UIStoryboardSegue,
+                                  sender: AnyObject?) {
+        super.prepareForSegue(segue, sender: sender)
+        if segue.identifier == "selectContact" {
+            if let destination = segue.destinationViewController as? MessagesViewController,
+                userIndex = contactsTableView.indexPathForSelectedRow?.row {
+                destination.userName = self.resultSearchController.active ? filteredUsers[userIndex] : users[userIndex]
+            }
+            
+            
+        }
+    }
+    
+    
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(textCellIdentifier, forIndexPath: indexPath)
         
@@ -84,6 +122,8 @@ class ContactsViewController: UIViewController, UITableViewDataSource, UITableVi
         }
     }
     
+    
+    
     func updateSearchResultsForSearchController(searchController: UISearchController)
     {
         filteredUsers.removeAll(keepCapacity: false)
@@ -97,6 +137,29 @@ class ContactsViewController: UIViewController, UITableViewDataSource, UITableVi
         }
         
         
+    }
+    
+    func getUsersHandler(notification : NSNotification) {
+        var usersArray : [String] = []
+        if let result = notification.object as? HseMsg.Result {
+            if result.hasGetUsers {
+                if let fetchedUsers = result.getUsers {
+                    fetchedUsers.users.forEach({ (user) in
+                        usersArray.append(user.username)
+                    })
+                    self.users = usersArray
+                    self.contactsTableView.reloadData()
+                }
+            }
+           NSNotificationCenter.defaultCenter().removeObserver(self, name: notification.name, object: nil)
+        }
+    }
+    
+    func newUserHandler(notification : NSNotification) {
+        if let newUser = notification.object as? HseMsg.User {
+            self.users.append(newUser.username)
+            self.contactsTableView.reloadData()
+        }
     }
     
     

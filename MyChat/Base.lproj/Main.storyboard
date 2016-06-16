@@ -41,14 +41,6 @@
                                     </mask>
                                 </variation>
                             </label>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="password" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mUe-fD-QHf">
-                                <rect key="frame" x="76" y="252" width="169" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
-                                <variation key="widthClass=compact" ambiguous="YES" misplaced="YES">
-                                    <rect key="frame" x="76" y="280" width="172" height="30"/>
-                                </variation>
-                            </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="password" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oNg-Mg-cJL">
                                 <rect key="frame" x="121" y="224" width="79" height="21"/>
                                 <constraints>
@@ -125,6 +117,14 @@
                                     <action selector="loginTappedHandler:" destination="BYZ-38-t0r" eventType="touchUpInside" id="icM-56-fPA"/>
                                 </connections>
                             </button>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="password" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mUe-fD-QHf">
+                                <rect key="frame" x="76" y="252" width="169" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <variation key="widthClass=compact" ambiguous="YES" misplaced="YES">
+                                    <rect key="frame" x="76" y="280" width="172" height="30"/>
+                                </variation>
+                            </textField>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -146,11 +146,11 @@
                         <variation key="default">
                             <mask key="subviews">
                                 <exclude reference="5Zc-nk-UxK"/>
-                                <exclude reference="mUe-fD-QHf"/>
                                 <exclude reference="oNg-Mg-cJL"/>
                                 <exclude reference="E4O-UW-KSr"/>
                                 <exclude reference="rvM-SL-Fba"/>
                                 <exclude reference="gZS-bG-Hex"/>
+                                <exclude reference="mUe-fD-QHf"/>
                             </mask>
                             <mask key="constraints">
                                 <exclude reference="C2v-g3-ZAA"/>
@@ -172,11 +172,11 @@
                         <variation key="widthClass=compact">
                             <mask key="subviews">
                                 <include reference="5Zc-nk-UxK"/>
-                                <include reference="mUe-fD-QHf"/>
                                 <include reference="oNg-Mg-cJL"/>
                                 <include reference="E4O-UW-KSr"/>
                                 <include reference="rvM-SL-Fba"/>
                                 <include reference="gZS-bG-Hex"/>
+                                <include reference="mUe-fD-QHf"/>
                             </mask>
                         </variation>
                         <variation key="heightClass=regular-widthClass=compact">
@@ -206,12 +206,12 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1908" y="118.5"/>
+            <point key="canvasLocation" x="-1899" y="98.25"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Tf6-cl-SJ6">
             <objects>
-                <navigationController id="Blc-HD-wUi" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="MyNavigationController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Blc-HD-wUi" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="6vf-Gn-aGe">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -224,7 +224,7 @@
             </objects>
             <point key="canvasLocation" x="-1113" y="98.25"/>
         </scene>
-        <!--Contacts View Controller-->
+        <!--Contacts-->
         <scene sceneID="WdE-tk-pcn">
             <objects>
                 <viewController automaticallyAdjustsScrollViewInsets="NO" id="SvP-r9-0eG" customClass="ContactsViewController" customModule="HseChat" customModuleProvider="target" sceneMemberID="viewController">
@@ -236,6 +236,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="NzJ-Ap-gy7">
+                                <rect key="frame" x="-60" y="-14" width="121" height="29"/>
+                                <segments>
+                                    <segment title="Online"/>
+                                    <segment title="Offline"/>
+                                </segments>
+                            </segmentedControl>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="53" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="n8d-ms-C4S">
                                 <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -248,7 +255,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                         <connections>
-                                            <segue destination="Oxs-7M-6LZ" kind="show" id="7dE-bD-y9G"/>
+                                            <segue destination="Oxs-7M-6LZ" kind="show" identifier="selectContact" id="NwH-7g-mCf"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -256,16 +263,25 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="n8d-ms-C4S" firstAttribute="top" secondItem="HET-mC-HV5" secondAttribute="bottom" id="6BM-YE-JqP"/>
+                            <constraint firstItem="NzJ-Ap-gy7" firstAttribute="trailing" secondItem="n8d-ms-C4S" secondAttribute="trailing" id="2Lf-7p-eO7"/>
+                            <constraint firstItem="n8d-ms-C4S" firstAttribute="top" secondItem="HET-mC-HV5" secondAttribute="bottom" id="6BM-YE-JqP">
+                                <variation key="heightClass=regular-widthClass=compact" constant="29"/>
+                            </constraint>
                             <constraint firstItem="n8d-ms-C4S" firstAttribute="leading" secondItem="suz-Px-GWk" secondAttribute="leading" id="Urw-Gh-Clz"/>
+                            <constraint firstItem="NzJ-Ap-gy7" firstAttribute="top" secondItem="HET-mC-HV5" secondAttribute="bottom" id="hBj-MD-xkq"/>
                             <constraint firstItem="n8d-ms-C4S" firstAttribute="bottom" secondItem="CG4-k6-zeW" secondAttribute="top" id="iVT-YF-8NM"/>
                             <constraint firstAttribute="trailing" secondItem="n8d-ms-C4S" secondAttribute="trailing" id="wiT-fs-Der"/>
+                            <constraint firstItem="NzJ-Ap-gy7" firstAttribute="leading" secondItem="n8d-ms-C4S" secondAttribute="leading" id="zeV-zJ-UJs"/>
                         </constraints>
                         <variation key="default">
                             <mask key="subviews">
+                                <exclude reference="NzJ-Ap-gy7"/>
                                 <exclude reference="n8d-ms-C4S"/>
                             </mask>
                             <mask key="constraints">
+                                <exclude reference="2Lf-7p-eO7"/>
+                                <exclude reference="hBj-MD-xkq"/>
+                                <exclude reference="zeV-zJ-UJs"/>
                                 <exclude reference="6BM-YE-JqP"/>
                                 <exclude reference="Urw-Gh-Clz"/>
                                 <exclude reference="iVT-YF-8NM"/>
@@ -274,9 +290,13 @@
                         </variation>
                         <variation key="heightClass=regular-widthClass=compact">
                             <mask key="subviews">
+                                <include reference="NzJ-Ap-gy7"/>
                                 <include reference="n8d-ms-C4S"/>
                             </mask>
                             <mask key="constraints">
+                                <include reference="2Lf-7p-eO7"/>
+                                <include reference="hBj-MD-xkq"/>
+                                <include reference="zeV-zJ-UJs"/>
                                 <include reference="6BM-YE-JqP"/>
                                 <include reference="Urw-Gh-Clz"/>
                                 <include reference="iVT-YF-8NM"/>
@@ -284,9 +304,23 @@
                             </mask>
                         </variation>
                     </view>
-                    <navigationItem key="navigationItem" id="eVY-76-Jvm"/>
+                    <navigationItem key="navigationItem" title="Contacts" id="eVY-76-Jvm">
+                        <barButtonItem key="backBarButtonItem" title="Back" id="Hs9-w4-XYT"/>
+                        <barButtonItem key="rightBarButtonItem" title="Logout" style="plain" id="smL-Yt-27c">
+                            <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="FD9-18-x08">
+                                <rect key="frame" x="-23" y="-15" width="46" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <state key="normal" title="Logout"/>
+                                <connections>
+                                    <action selector="logoutButton:" destination="SvP-r9-0eG" eventType="touchUpInside" id="yt2-Zd-bGo"/>
+                                </connections>
+                            </button>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="contactsTableView" destination="n8d-ms-C4S" id="9mR-QW-JAQ"/>
+                        <outlet property="logoutButtonHandler" destination="FD9-18-x08" id="WEu-RR-NsE"/>
                         <outlet property="searchDisplayController" destination="PPB-bO-rE5" id="OYv-zv-Ghk"/>
                     </connections>
                 </viewController>
@@ -305,7 +339,7 @@
         <!--Messages View Controller-->
         <scene sceneID="iQj-f1-U7l">
             <objects>
-                <viewController id="Oxs-7M-6LZ" customClass="MessagesViewController" customModule="HseChat" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="MessagesViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Oxs-7M-6LZ" customClass="MessagesViewController" customModule="HseChat" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="4sf-N3-sJa"/>
                         <viewControllerLayoutGuide type="bottom" id="cSG-gG-5zn"/>

@@ -5,7 +5,8 @@ package HseMsg;
 message Message {
 	required string author = 1;
 	required string text = 2;
-	required uint32 date = 3;
+	required int64 date = 3;
+	required string receiver = 4;
 }
 
 message User {
@@ -40,8 +41,8 @@ message Request {
 		SignUp sign_up = 2;
 		SignIn sign_in = 3;
 		GetUsers get_users = 4;
-		GetMessagesWithUser get_user_messages = 5;
-		SendMessageToUser send_message = 6;
+		GetMessagesWithUser get_messages_with_user = 5;
+		SendMessageToUser send_message_to_user = 6;
 	}
 }
 

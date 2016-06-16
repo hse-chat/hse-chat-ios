@@ -15,6 +15,7 @@ public func == (lhs: HseMsg.Message_, rhs: HseMsg.Message_) -> Bool {
   fieldCheck = fieldCheck && (lhs.hasAuthor == rhs.hasAuthor) && (!lhs.hasAuthor || lhs.author == rhs.author)
   fieldCheck = fieldCheck && (lhs.hasText == rhs.hasText) && (!lhs.hasText || lhs.text == rhs.text)
   fieldCheck = fieldCheck && (lhs.hasDate == rhs.hasDate) && (!lhs.hasDate || lhs.date == rhs.date)
+  fieldCheck = fieldCheck && (lhs.hasReceiver == rhs.hasReceiver) && (!lhs.hasReceiver || lhs.receiver == rhs.receiver)
   fieldCheck = (fieldCheck && (lhs.unknownFields == rhs.unknownFields))
   return fieldCheck
 }
@@ -38,8 +39,8 @@ public func == (lhs: HseMsg.Request, rhs: HseMsg.Request) -> Bool {
   fieldCheck = fieldCheck && (lhs.hasSignUp == rhs.hasSignUp) && (!lhs.hasSignUp || lhs.signUp == rhs.signUp)
   fieldCheck = fieldCheck && (lhs.hasSignIn == rhs.hasSignIn) && (!lhs.hasSignIn || lhs.signIn == rhs.signIn)
   fieldCheck = fieldCheck && (lhs.hasGetUsers == rhs.hasGetUsers) && (!lhs.hasGetUsers || lhs.getUsers == rhs.getUsers)
-  fieldCheck = fieldCheck && (lhs.hasGetUserMessages == rhs.hasGetUserMessages) && (!lhs.hasGetUserMessages || lhs.getUserMessages == rhs.getUserMessages)
-  fieldCheck = fieldCheck && (lhs.hasSendMessage == rhs.hasSendMessage) && (!lhs.hasSendMessage || lhs.sendMessage == rhs.sendMessage)
+  fieldCheck = fieldCheck && (lhs.hasGetMessagesWithUser == rhs.hasGetMessagesWithUser) && (!lhs.hasGetMessagesWithUser || lhs.getMessagesWithUser == rhs.getMessagesWithUser)
+  fieldCheck = fieldCheck && (lhs.hasSendMessageToUser == rhs.hasSendMessageToUser) && (!lhs.hasSendMessageToUser || lhs.sendMessageToUser == rhs.sendMessageToUser)
   fieldCheck = (fieldCheck && (lhs.unknownFields == rhs.unknownFields))
   return fieldCheck
 }
@@ -228,9 +229,12 @@ public extension HseMsg {
     public private(set) var text:String = ""
 
     public private(set) var hasText:Bool = false
-    public private(set) var date:UInt32 = UInt32(0)
+    public private(set) var date:Int64 = Int64(0)
 
     public private(set) var hasDate:Bool = false
+    public private(set) var receiver:String = ""
+
+    public private(set) var hasReceiver:Bool = false
     required public init() {
          super.init()
     }
@@ -244,6 +248,9 @@ public extension HseMsg {
       if !hasDate {
         return false
       }
+      if !hasReceiver {
+        return false
+      }
      return true
     }
     override public func writeToCodedOutputStream(output:CodedOutputStream) throws {
@@ -254,7 +261,10 @@ public extension HseMsg {
         try output.writeString(2, value:text)
       }
       if hasDate {
-        try output.writeUInt32(3, value:date)
+        try output.writeInt64(3, value:date)
+      }
+      if hasReceiver {
+        try output.writeString(4, value:receiver)
       }
       try unknownFields.writeToCodedOutputStream(output)
     }
@@ -272,7 +282,10 @@ public extension HseMsg {
         serialize_size += text.computeStringSize(2)
       }
       if hasDate {
-        serialize_size += date.computeUInt32Size(3)
+        serialize_size += date.computeInt64Size(3)
+      }
+      if hasReceiver {
+        serialize_size += receiver.computeStringSize(4)
       }
       serialize_size += unknownFields.serializedSize()
       memoizedSerializedSize = serialize_size
@@ -335,6 +348,9 @@ public extension HseMsg {
       if hasDate {
         output += "\(indent) date: \(date) \n"
       }
+      if hasReceiver {
+        output += "\(indent) receiver: \(receiver) \n"
+      }
       output += unknownFields.getDescription(indent)
       return output
     }
@@ -349,6 +365,9 @@ public extension HseMsg {
             }
             if hasDate {
                hashCode = (hashCode &* 31) &+ date.hashValue
+            }
+            if hasReceiver {
+               hashCode = (hashCode &* 31) &+ receiver.hashValue
             }
             hashCode = (hashCode &* 31) &+  unknownFields.hashValue
             return hashCode
@@ -429,7 +448,7 @@ public extension HseMsg {
                 return builderResult.hasDate
            }
       }
-      public var date:UInt32 {
+      public var date:Int64 {
            get {
                 return builderResult.date
            }
@@ -438,13 +457,36 @@ public extension HseMsg {
                builderResult.date = value
            }
       }
-      public func setDate(value:UInt32) -> HseMsg.Message_.Builder {
+      public func setDate(value:Int64) -> HseMsg.Message_.Builder {
         self.date = value
         return self
       }
       public func clearDate() -> HseMsg.Message_.Builder{
            builderResult.hasDate = false
-           builderResult.date = UInt32(0)
+           builderResult.date = Int64(0)
+           return self
+      }
+      public var hasReceiver:Bool {
+           get {
+                return builderResult.hasReceiver
+           }
+      }
+      public var receiver:String {
+           get {
+                return builderResult.receiver
+           }
+           set (value) {
+               builderResult.hasReceiver = true
+               builderResult.receiver = value
+           }
+      }
+      public func setReceiver(value:String) -> HseMsg.Message_.Builder {
+        self.receiver = value
+        return self
+      }
+      public func clearReceiver() -> HseMsg.Message_.Builder{
+           builderResult.hasReceiver = false
+           builderResult.receiver = ""
            return self
       }
       override public var internalGetResult:GeneratedMessage {
@@ -480,6 +522,9 @@ public extension HseMsg {
         if other.hasDate {
              date = other.date
         }
+        if other.hasReceiver {
+             receiver = other.receiver
+        }
         try mergeUnknownFields(other.unknownFields)
         return self
       }
@@ -502,7 +547,10 @@ public extension HseMsg {
             text = try input.readString()
 
           case 24 :
-            date = try input.readUInt32()
+            date = try input.readInt64()
+
+          case 34 :
+            receiver = try input.readString()
 
           default:
             if (!(try parseUnknownField(input,unknownFields:unknownFieldsBuilder, extensionRegistry:extensionRegistry, tag:protobufTag))) {
@@ -1892,21 +1940,21 @@ public extension HseMsg {
                 return nil
            }
       }
-      case GetUserMessages(HseMsg.Request.GetMessagesWithUser)
+      case GetMessagesWithUser(HseMsg.Request.GetMessagesWithUser)
 
-      public static func getGetUserMessages(value:Action) -> HseMsg.Request.GetMessagesWithUser? {
+      public static func getGetMessagesWithUser(value:Action) -> HseMsg.Request.GetMessagesWithUser? {
            switch value {
-           case .GetUserMessages(let enumValue):
+           case .GetMessagesWithUser(let enumValue):
                 return enumValue
            default:
                 return nil
            }
       }
-      case SendMessage(HseMsg.Request.SendMessageToUser)
+      case SendMessageToUser(HseMsg.Request.SendMessageToUser)
 
-      public static func getSendMessage(value:Action) -> HseMsg.Request.SendMessageToUser? {
+      public static func getSendMessageToUser(value:Action) -> HseMsg.Request.SendMessageToUser? {
            switch value {
-           case .SendMessage(let enumValue):
+           case .SendMessageToUser(let enumValue):
                 return enumValue
            default:
                 return nil
@@ -1973,17 +2021,17 @@ public extension HseMsg {
           set(newValue) {
           }
     }
-    public private(set) var getUserMessages:HseMsg.Request.GetMessagesWithUser!{
+    public private(set) var getMessagesWithUser:HseMsg.Request.GetMessagesWithUser!{
          get {
-              return Request.Action.getGetUserMessages(storageAction)
+              return Request.Action.getGetMessagesWithUser(storageAction)
          }
          set (newvalue) {
-              storageAction = Request.Action.GetUserMessages(newvalue)
+              storageAction = Request.Action.GetMessagesWithUser(newvalue)
          }
     }
-    public private(set) var hasGetUserMessages:Bool {
+    public private(set) var hasGetMessagesWithUser:Bool {
           get {
-               if Request.Action.getGetUserMessages(storageAction) == nil {
+               if Request.Action.getGetMessagesWithUser(storageAction) == nil {
                    return false
                }
                return true
@@ -1991,17 +2039,17 @@ public extension HseMsg {
           set(newValue) {
           }
     }
-    public private(set) var sendMessage:HseMsg.Request.SendMessageToUser!{
+    public private(set) var sendMessageToUser:HseMsg.Request.SendMessageToUser!{
          get {
-              return Request.Action.getSendMessage(storageAction)
+              return Request.Action.getSendMessageToUser(storageAction)
          }
          set (newvalue) {
-              storageAction = Request.Action.SendMessage(newvalue)
+              storageAction = Request.Action.SendMessageToUser(newvalue)
          }
     }
-    public private(set) var hasSendMessage:Bool {
+    public private(set) var hasSendMessageToUser:Bool {
           get {
-               if Request.Action.getSendMessage(storageAction) == nil {
+               if Request.Action.getSendMessageToUser(storageAction) == nil {
                    return false
                }
                return true
@@ -2026,13 +2074,13 @@ public extension HseMsg {
          return false
        }
       }
-      if hasGetUserMessages {
-       if !getUserMessages.isInitialized() {
+      if hasGetMessagesWithUser {
+       if !getMessagesWithUser.isInitialized() {
          return false
        }
       }
-      if hasSendMessage {
-       if !sendMessage.isInitialized() {
+      if hasSendMessageToUser {
+       if !sendMessageToUser.isInitialized() {
          return false
        }
       }
@@ -2051,11 +2099,11 @@ public extension HseMsg {
       if hasGetUsers {
         try output.writeMessage(4, value:getUsers)
       }
-      if hasGetUserMessages {
-        try output.writeMessage(5, value:getUserMessages)
+      if hasGetMessagesWithUser {
+        try output.writeMessage(5, value:getMessagesWithUser)
       }
-      if hasSendMessage {
-        try output.writeMessage(6, value:sendMessage)
+      if hasSendMessageToUser {
+        try output.writeMessage(6, value:sendMessageToUser)
       }
       try unknownFields.writeToCodedOutputStream(output)
     }
@@ -2084,14 +2132,14 @@ public extension HseMsg {
               serialize_size += varSizegetUsers
           }
       }
-      if hasGetUserMessages {
-          if let varSizegetUserMessages = getUserMessages?.computeMessageSize(5) {
-              serialize_size += varSizegetUserMessages
+      if hasGetMessagesWithUser {
+          if let varSizegetMessagesWithUser = getMessagesWithUser?.computeMessageSize(5) {
+              serialize_size += varSizegetMessagesWithUser
           }
       }
-      if hasSendMessage {
-          if let varSizesendMessage = sendMessage?.computeMessageSize(6) {
-              serialize_size += varSizesendMessage
+      if hasSendMessageToUser {
+          if let varSizesendMessageToUser = sendMessageToUser?.computeMessageSize(6) {
+              serialize_size += varSizesendMessageToUser
           }
       }
       serialize_size += unknownFields.serializedSize()
@@ -2170,17 +2218,17 @@ public extension HseMsg {
         }
         output += "\(indent) }\n"
       }
-      if hasGetUserMessages {
-        output += "\(indent) getUserMessages {\n"
-        if let outDescGetUserMessages = getUserMessages {
-          output += try outDescGetUserMessages.getDescription("\(indent)  ")
+      if hasGetMessagesWithUser {
+        output += "\(indent) getMessagesWithUser {\n"
+        if let outDescGetMessagesWithUser = getMessagesWithUser {
+          output += try outDescGetMessagesWithUser.getDescription("\(indent)  ")
         }
         output += "\(indent) }\n"
       }
-      if hasSendMessage {
-        output += "\(indent) sendMessage {\n"
-        if let outDescSendMessage = sendMessage {
-          output += try outDescSendMessage.getDescription("\(indent)  ")
+      if hasSendMessageToUser {
+        output += "\(indent) sendMessageToUser {\n"
+        if let outDescSendMessageToUser = sendMessageToUser {
+          output += try outDescSendMessageToUser.getDescription("\(indent)  ")
         }
         output += "\(indent) }\n"
       }
@@ -2208,14 +2256,14 @@ public extension HseMsg {
                     hashCode = (hashCode &* 31) &+ hashValuegetUsers
                 }
             }
-            if hasGetUserMessages {
-                if let hashValuegetUserMessages = getUserMessages?.hashValue {
-                    hashCode = (hashCode &* 31) &+ hashValuegetUserMessages
+            if hasGetMessagesWithUser {
+                if let hashValuegetMessagesWithUser = getMessagesWithUser?.hashValue {
+                    hashCode = (hashCode &* 31) &+ hashValuegetMessagesWithUser
                 }
             }
-            if hasSendMessage {
-                if let hashValuesendMessage = sendMessage?.hashValue {
-                    hashCode = (hashCode &* 31) &+ hashValuesendMessage
+            if hasSendMessageToUser {
+                if let hashValuesendMessageToUser = sendMessageToUser?.hashValue {
+                    hashCode = (hashCode &* 31) &+ hashValuesendMessageToUser
                 }
             }
             hashCode = (hashCode &* 31) &+  unknownFields.hashValue
@@ -2422,106 +2470,106 @@ public extension HseMsg {
         builderResult.getUsers = nil
         return self
       }
-      public var hasGetUserMessages:Bool {
+      public var hasGetMessagesWithUser:Bool {
            get {
-               return builderResult.hasGetUserMessages
+               return builderResult.hasGetMessagesWithUser
            }
       }
-      public var getUserMessages:HseMsg.Request.GetMessagesWithUser! {
+      public var getMessagesWithUser:HseMsg.Request.GetMessagesWithUser! {
            get {
-               if getUserMessagesBuilder_ != nil {
-                  builderResult.getUserMessages = getUserMessagesBuilder_.getMessage()
+               if getMessagesWithUserBuilder_ != nil {
+                  builderResult.getMessagesWithUser = getMessagesWithUserBuilder_.getMessage()
                }
-               return builderResult.getUserMessages
+               return builderResult.getMessagesWithUser
            }
            set (value) {
-               builderResult.hasGetUserMessages = true
-               builderResult.getUserMessages = value
+               builderResult.hasGetMessagesWithUser = true
+               builderResult.getMessagesWithUser = value
            }
       }
-      private var getUserMessagesBuilder_:HseMsg.Request.GetMessagesWithUser.Builder! {
+      private var getMessagesWithUserBuilder_:HseMsg.Request.GetMessagesWithUser.Builder! {
            didSet {
-              builderResult.hasGetUserMessages = true
+              builderResult.hasGetMessagesWithUser = true
            }
       }
-      public func getGetUserMessagesBuilder() -> HseMsg.Request.GetMessagesWithUser.Builder {
-        if getUserMessagesBuilder_ == nil {
-           getUserMessagesBuilder_ = HseMsg.Request.GetMessagesWithUser.Builder()
-           builderResult.getUserMessages = getUserMessagesBuilder_.getMessage()
-           if getUserMessages != nil {
-              try! getUserMessagesBuilder_.mergeFrom(getUserMessages)
+      public func getGetMessagesWithUserBuilder() -> HseMsg.Request.GetMessagesWithUser.Builder {
+        if getMessagesWithUserBuilder_ == nil {
+           getMessagesWithUserBuilder_ = HseMsg.Request.GetMessagesWithUser.Builder()
+           builderResult.getMessagesWithUser = getMessagesWithUserBuilder_.getMessage()
+           if getMessagesWithUser != nil {
+              try! getMessagesWithUserBuilder_.mergeFrom(getMessagesWithUser)
            }
         }
-        return getUserMessagesBuilder_
+        return getMessagesWithUserBuilder_
       }
-      public func setGetUserMessages(value:HseMsg.Request.GetMessagesWithUser!) -> HseMsg.Request.Builder {
-        self.getUserMessages = value
+      public func setGetMessagesWithUser(value:HseMsg.Request.GetMessagesWithUser!) -> HseMsg.Request.Builder {
+        self.getMessagesWithUser = value
         return self
       }
-      public func mergeGetUserMessages(value:HseMsg.Request.GetMessagesWithUser) throws -> HseMsg.Request.Builder {
-        if builderResult.hasGetUserMessages {
-          builderResult.getUserMessages = try HseMsg.Request.GetMessagesWithUser.builderWithPrototype(builderResult.getUserMessages).mergeFrom(value).buildPartial()
+      public func mergeGetMessagesWithUser(value:HseMsg.Request.GetMessagesWithUser) throws -> HseMsg.Request.Builder {
+        if builderResult.hasGetMessagesWithUser {
+          builderResult.getMessagesWithUser = try HseMsg.Request.GetMessagesWithUser.builderWithPrototype(builderResult.getMessagesWithUser).mergeFrom(value).buildPartial()
         } else {
-          builderResult.getUserMessages = value
+          builderResult.getMessagesWithUser = value
         }
-        builderResult.hasGetUserMessages = true
+        builderResult.hasGetMessagesWithUser = true
         return self
       }
-      public func clearGetUserMessages() -> HseMsg.Request.Builder {
-        getUserMessagesBuilder_ = nil
-        builderResult.hasGetUserMessages = false
-        builderResult.getUserMessages = nil
+      public func clearGetMessagesWithUser() -> HseMsg.Request.Builder {
+        getMessagesWithUserBuilder_ = nil
+        builderResult.hasGetMessagesWithUser = false
+        builderResult.getMessagesWithUser = nil
         return self
       }
-      public var hasSendMessage:Bool {
+      public var hasSendMessageToUser:Bool {
            get {
-               return builderResult.hasSendMessage
+               return builderResult.hasSendMessageToUser
            }
       }
-      public var sendMessage:HseMsg.Request.SendMessageToUser! {
+      public var sendMessageToUser:HseMsg.Request.SendMessageToUser! {
            get {
-               if sendMessageBuilder_ != nil {
-                  builderResult.sendMessage = sendMessageBuilder_.getMessage()
+               if sendMessageToUserBuilder_ != nil {
+                  builderResult.sendMessageToUser = sendMessageToUserBuilder_.getMessage()
                }
-               return builderResult.sendMessage
+               return builderResult.sendMessageToUser
            }
            set (value) {
-               builderResult.hasSendMessage = true
-               builderResult.sendMessage = value
+               builderResult.hasSendMessageToUser = true
+               builderResult.sendMessageToUser = value
            }
       }
-      private var sendMessageBuilder_:HseMsg.Request.SendMessageToUser.Builder! {
+      private var sendMessageToUserBuilder_:HseMsg.Request.SendMessageToUser.Builder! {
            didSet {
-              builderResult.hasSendMessage = true
+              builderResult.hasSendMessageToUser = true
            }
       }
-      public func getSendMessageBuilder() -> HseMsg.Request.SendMessageToUser.Builder {
-        if sendMessageBuilder_ == nil {
-           sendMessageBuilder_ = HseMsg.Request.SendMessageToUser.Builder()
-           builderResult.sendMessage = sendMessageBuilder_.getMessage()
-           if sendMessage != nil {
-              try! sendMessageBuilder_.mergeFrom(sendMessage)
+      public func getSendMessageToUserBuilder() -> HseMsg.Request.SendMessageToUser.Builder {
+        if sendMessageToUserBuilder_ == nil {
+           sendMessageToUserBuilder_ = HseMsg.Request.SendMessageToUser.Builder()
+           builderResult.sendMessageToUser = sendMessageToUserBuilder_.getMessage()
+           if sendMessageToUser != nil {
+              try! sendMessageToUserBuilder_.mergeFrom(sendMessageToUser)
            }
         }
-        return sendMessageBuilder_
+        return sendMessageToUserBuilder_
       }
-      public func setSendMessage(value:HseMsg.Request.SendMessageToUser!) -> HseMsg.Request.Builder {
-        self.sendMessage = value
+      public func setSendMessageToUser(value:HseMsg.Request.SendMessageToUser!) -> HseMsg.Request.Builder {
+        self.sendMessageToUser = value
         return self
       }
-      public func mergeSendMessage(value:HseMsg.Request.SendMessageToUser) throws -> HseMsg.Request.Builder {
-        if builderResult.hasSendMessage {
-          builderResult.sendMessage = try HseMsg.Request.SendMessageToUser.builderWithPrototype(builderResult.sendMessage).mergeFrom(value).buildPartial()
+      public func mergeSendMessageToUser(value:HseMsg.Request.SendMessageToUser) throws -> HseMsg.Request.Builder {
+        if builderResult.hasSendMessageToUser {
+          builderResult.sendMessageToUser = try HseMsg.Request.SendMessageToUser.builderWithPrototype(builderResult.sendMessageToUser).mergeFrom(value).buildPartial()
         } else {
-          builderResult.sendMessage = value
+          builderResult.sendMessageToUser = value
         }
-        builderResult.hasSendMessage = true
+        builderResult.hasSendMessageToUser = true
         return self
       }
-      public func clearSendMessage() -> HseMsg.Request.Builder {
-        sendMessageBuilder_ = nil
-        builderResult.hasSendMessage = false
-        builderResult.sendMessage = nil
+      public func clearSendMessageToUser() -> HseMsg.Request.Builder {
+        sendMessageToUserBuilder_ = nil
+        builderResult.hasSendMessageToUser = false
+        builderResult.sendMessageToUser = nil
         return self
       }
       override public var internalGetResult:GeneratedMessage {
@@ -2560,11 +2608,11 @@ public extension HseMsg {
         if (other.hasGetUsers) {
             try mergeGetUsers(other.getUsers)
         }
-        if (other.hasGetUserMessages) {
-            try mergeGetUserMessages(other.getUserMessages)
+        if (other.hasGetMessagesWithUser) {
+            try mergeGetMessagesWithUser(other.getMessagesWithUser)
         }
-        if (other.hasSendMessage) {
-            try mergeSendMessage(other.sendMessage)
+        if (other.hasSendMessageToUser) {
+            try mergeSendMessageToUser(other.sendMessageToUser)
         }
         try mergeUnknownFields(other.unknownFields)
         return self
@@ -2610,19 +2658,19 @@ public extension HseMsg {
 
           case 42 :
             let subBuilder:HseMsg.Request.GetMessagesWithUser.Builder = HseMsg.Request.GetMessagesWithUser.Builder()
-            if hasGetUserMessages {
-              try subBuilder.mergeFrom(getUserMessages)
+            if hasGetMessagesWithUser {
+              try subBuilder.mergeFrom(getMessagesWithUser)
             }
             try input.readMessage(subBuilder, extensionRegistry:extensionRegistry)
-            getUserMessages = subBuilder.buildPartial()
+            getMessagesWithUser = subBuilder.buildPartial()
 
           case 50 :
             let subBuilder:HseMsg.Request.SendMessageToUser.Builder = HseMsg.Request.SendMessageToUser.Builder()
-            if hasSendMessage {
-              try subBuilder.mergeFrom(sendMessage)
+            if hasSendMessageToUser {
+              try subBuilder.mergeFrom(sendMessageToUser)
             }
             try input.readMessage(subBuilder, extensionRegistry:extensionRegistry)
-            sendMessage = subBuilder.buildPartial()
+            sendMessageToUser = subBuilder.buildPartial()
 
           default:
             if (!(try parseUnknownField(input,unknownFields:unknownFieldsBuilder, extensionRegistry:extensionRegistry, tag:protobufTag))) {

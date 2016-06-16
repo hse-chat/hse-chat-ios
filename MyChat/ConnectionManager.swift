@@ -8,58 +8,41 @@
 
 import Foundation
 import Swocket
+import ReachabilitySwift
 
-let SOCKET_HOST = "192.168.0.81"
-
-let SOCKET_PORT : UInt = 80
-
-class ConnectionManager : NSObject {
+class ConnectionManager {
+    
     static let sharedInstance = ConnectionManager()
     
-    var lengthBuffer = NSMutableData()
+    var chunckedConnection = ChunkedConnection()
     
-    var responseBuffer = NSMutableData()
+    var currentUser : String? = nil
     
-    var isConnected : Bool = false
+    var isSignedIn : Bool = false
     
-    let client = Swocket.TCP.init(host: SOCKET_HOST, port: SOCKET_PORT)
-    
-    override init() {
-        super.init()
+    func isConnected() -> Bool {
+        let reachability: Reachability
+        do {
+            reachability = try Reachability.reachabilityForInternetConnection()
+            return chunckedConnection.isConnected
+        } catch {
+            print("Unable to create Reachability")
+            return false
+        }
+
     }
     
-    func sendData(data: HseMsg.Request) {
-        print("[ConnectionManager]: sending package")
-        client.sendDataAsync(data.data())
+    func sendData(data: HseMsg.Request.Builder, id: UInt32) {
+        chunckedConnection.sendData(data, id: id)
     }
+    
     
     func establishConnection() {
-        client.connectAsync()
-        print("[ConnectionManager]: connected to socket")
-        
-        client.recieveDataAsync({ (data, error) -> Void in
-            if let data = data {
-                print("Received data")
-                if (self.lengthBuffer.length == 4) {
-                    var length : UInt32 = 0
-                    data.getBytes(&length, length: 4)
-                    length = UInt32(littleEndian: length)
-                    if self.responseBuffer.length == Int(length) {
-                        print("Received package")
-                        self.lengthBuffer = NSMutableData()
-                        self.responseBuffer = NSMutableData()
-                    } else {
-                        self.responseBuffer.appendData(data)
-                    }
-                } else {
-                    self.lengthBuffer.appendData(data)
-                }
-            }
-        })
+        chunckedConnection.connect()
     }
     
     func disconnect() {
-        client.disconnectAsync()
+        chunckedConnection.disconnect()
     }
     
 }

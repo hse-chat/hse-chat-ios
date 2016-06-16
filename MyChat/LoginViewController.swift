@@ -10,11 +10,30 @@ import UIKit
 
 class LoginViewController: UIViewController {
     
+    private var tempUserName : String? = nil
+    
     @IBOutlet private weak var userNameField: UITextField!
     
     @IBOutlet private weak var passwordField: UITextField!
+    
 
     @IBAction func loginTappedHandler(sender: AnyObject) {
+        if let username = self.userNameField.text {
+            if let password = self.passwordField.text {
+                    
+                var notificationId = DataManager.getRequestIdentificator()
+                
+                let observer:NSObjectProtocol = NSNotificationCenter.defaultCenter().addObserverForName(
+                    notificationId.notificationName,
+                    object: nil, queue: nil,
+                    usingBlock: signInHandler)
+                
+                self.tempUserName = username
+                    
+                DataManager.SignIn(username, password: password, id: notificationId.id)
+            }
+        }
+
     }
     
     @IBAction func registrationTappedHandler(sender: AnyObject) {
@@ -29,19 +48,17 @@ class LoginViewController: UIViewController {
                     alert.addAction(UIAlertAction(title: "Ok" , style: UIAlertActionStyle.Cancel, handler: nil))
                     self.presentViewController(alert, animated : true, completion: nil)
                 } else {
-                    let newReqBuilder = HseMsg.Request.Builder()
-                    newReqBuilder.getSignUpBuilder().setPassword(password)
-                    newReqBuilder.getSignUpBuilder().setUsername(username)
-                    newReqBuilder.setId(1)
                     
-                    do {
-                        print("[LoginViewController]: Trying to sign up")
-                        var request = try newReqBuilder.build()
-                        ConnectionManager.sharedInstance.sendData(request)
-                        
-                    } catch {
-                        print("[LoginViewController]: Sign up build failed")
-                    }
+                    var notificationId = DataManager.getRequestIdentificator()
+
+                    let observer:NSObjectProtocol = NSNotificationCenter.defaultCenter().addObserverForName(
+                        notificationId.notificationName,
+                        object: nil, queue: nil,
+                        usingBlock: signUpHandler)
+                    
+                    self.tempUserName = username
+                    
+                    DataManager.signUp(username, password: password, id: notificationId.id)
                     
                 }
             }
@@ -55,6 +72,43 @@ class LoginViewController: UIViewController {
         view.addGestureRecognizer(tapGesture)
         
         
+    }
+    
+    func signUpHandler(notification: NSNotification) {
+        if let result = notification.object as? HseMsg.Result {
+            if result.hasSignUp {
+                if Int(result.signUp.status.rawValue) != 1 {
+                    let alert = UIAlertController(title: result.signUp.status.description , message: nil , preferredStyle: UIAlertControllerStyle.Alert)
+                    alert.addAction(UIAlertAction(title: "Ok" , style: UIAlertActionStyle.Cancel, handler: nil))
+                    self.presentViewController(alert, animated : true, completion: nil)
+                } else {
+                    ConnectionManager.sharedInstance.isSignedIn = true
+                    ConnectionManager.sharedInstance.currentUser = self.tempUserName
+                    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                    let vc = storyboard.instantiateViewControllerWithIdentifier("MyNavigationController") as! UINavigationController
+                    self.presentViewController(vc, animated: true, completion: nil)
+                }
+            }
+        }
+    }
+    
+    func signInHandler(notification: NSNotification) {
+        if let result = notification.object as? HseMsg.Result {
+            if result.hasSignIn {
+                if Int(result.signIn.status.rawValue) != 1 {
+                    let alert = UIAlertController(title: result.signIn.status.description , message: nil , preferredStyle: UIAlertControllerStyle.Alert)
+                    alert.addAction(UIAlertAction(title: "Ok" , style: UIAlertActionStyle.Cancel, handler: nil))
+                    self.presentViewController(alert, animated : true, completion: nil)
+                } else {
+                    ConnectionManager.sharedInstance.isSignedIn = true
+                    ConnectionManager.sharedInstance.currentUser = self.tempUserName
+                    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                    let vc = storyboard.instantiateViewControllerWithIdentifier("MyNavigationController") as! UINavigationController
+                    self.presentViewController(vc, animated: true, completion: nil)
+                }
+                NSNotificationCenter.defaultCenter().removeObserver(self, name: notification.name, object: nil)
+            }
+        }
     }
     
     func tap(gesture: UITapGestureRecognizer) {
