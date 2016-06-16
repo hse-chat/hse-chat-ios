@@ -30,6 +30,9 @@ class DataManager {
     }
     
     static func signUp(username: String, password: String, id: UInt32) {
+        if !ConnectionManager.sharedInstance.chunckedConnection.isConnected {
+            ConnectionManager.sharedInstance.establishConnection()
+        }
         let newReqBuilder = HseMsg.Request.Builder()
         newReqBuilder.getSignUpBuilder().setPassword(password)
         newReqBuilder.getSignUpBuilder().setUsername(username)
@@ -39,6 +42,9 @@ class DataManager {
     }
     
     static func SignIn(username: String, password: String, id : UInt32) {
+        if !ConnectionManager.sharedInstance.chunckedConnection.isConnected {
+            ConnectionManager.sharedInstance.establishConnection()
+        }
         let newReqBuilder = HseMsg.Request.Builder()
         newReqBuilder.getSignInBuilder().setPassword(password)
         newReqBuilder.getSignInBuilder().setUsername(username)

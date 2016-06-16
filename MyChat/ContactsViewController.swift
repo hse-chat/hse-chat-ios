@@ -9,9 +9,29 @@
 import Foundation
 import UIKit
 
+struct ContactsUser {
+    var username : String
+    var isOnline : Bool
+}
+
 class ContactsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchResultsUpdating {
     
     var filteredUsers = [String]()
+    
+    var usersContacts : [ContactsUser] = [] {
+        didSet {
+            var newUsers : [String] = []
+            usersContacts.forEach({ (user) -> Void in
+                if user.isOnline && onlineControl.selectedSegmentIndex == 0 {
+                    newUsers.append(user.username)
+                } else if !user.isOnline && onlineControl.selectedSegmentIndex == 1 {
+                    newUsers.append(user.username)
+                }
+            })
+            self.users = newUsers
+            self.contactsTableView.reloadData()
+        }
+    }
     
     var users : [String] = []
     
@@ -21,7 +41,34 @@ class ContactsViewController: UIViewController, UITableViewDataSource, UITableVi
     @IBOutlet var contactsTableView: UITableView!
     var resultSearchController = UISearchController()
     
-    @IBOutlet weak var logoutButtonHandler: UIButton!
+    @IBOutlet weak var onlineControl: UISegmentedControl!
+    
+    @IBAction func onlineButtonHandler(sender: AnyObject) {
+        var newUsers : [String] = []
+        usersContacts.forEach({ (user) -> Void in
+            if user.isOnline && onlineControl.selectedSegmentIndex == 0 {
+                newUsers.append(user.username)
+            } else if !user.isOnline && onlineControl.selectedSegmentIndex == 1 {
+                newUsers.append(user.username)
+            }
+        })
+        self.users = newUsers
+        self.contactsTableView.reloadData()
+    }
+    
+    
+    @IBAction func logoutButtonHandler(sender: UIButton) {
+        let alert = UIAlertController(title: "Do you really want to log out", message: nil , preferredStyle: .Alert)
+        alert.addAction(UIAlertAction(title: "Cancel" , style: UIAlertActionStyle.Cancel, handler: nil))
+        let logoutAction = UIAlertAction(title: "Log Out", style: .Destructive) { (action) in
+            ConnectionManager.sharedInstance.disconnect()
+            let loginPageView = self.storyboard?.instantiateViewControllerWithIdentifier("LoginPage") as! LoginViewController
+            self.navigationController?.presentViewController(loginPageView, animated: true, completion: nil)
+        }
+        alert.addAction(logoutAction)
+        self.presentViewController(alert, animated : true, completion: nil)
+    }
+
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
@@ -29,6 +76,11 @@ class ContactsViewController: UIViewController, UITableViewDataSource, UITableVi
             "newUser",
             object: nil, queue: nil,
             usingBlock: newUserHandler)
+        
+        let updateObserver:NSObjectProtocol = NSNotificationCenter.defaultCenter().addObserverForName(
+            "userUpdated",
+            object: nil, queue: nil,
+            usingBlock: userUpdatedHanler)
     }
         
     override func viewDidLoad() {
@@ -140,15 +192,14 @@ class ContactsViewController: UIViewController, UITableViewDataSource, UITableVi
     }
     
     func getUsersHandler(notification : NSNotification) {
-        var usersArray : [String] = []
+        var usersArray : [ContactsUser] = []
         if let result = notification.object as? HseMsg.Result {
             if result.hasGetUsers {
                 if let fetchedUsers = result.getUsers {
                     fetchedUsers.users.forEach({ (user) in
-                        usersArray.append(user.username)
+                        usersArray.append(ContactsUser(username: user.username, isOnline: user.online))
                     })
-                    self.users = usersArray
-                    self.contactsTableView.reloadData()
+                    self.usersContacts = usersArray
                 }
             }
            NSNotificationCenter.defaultCenter().removeObserver(self, name: notification.name, object: nil)
@@ -157,8 +208,21 @@ class ContactsViewController: UIViewController, UITableViewDataSource, UITableVi
     
     func newUserHandler(notification : NSNotification) {
         if let newUser = notification.object as? HseMsg.User {
-            self.users.append(newUser.username)
-            self.contactsTableView.reloadData()
+            self.usersContacts.append(ContactsUser(username: newUser.username, isOnline: newUser.online))
+        }
+    }
+    
+    func userUpdatedHanler(notification : NSNotification) {
+        if let newUser = notification.object as? HseMsg.User {
+            var newUsers : [ContactsUser] = []
+            for var user in usersContacts {
+                if user.username == newUser.username {
+                    user.isOnline = newUser.online
+                }
+                newUsers.append(user)
+                
+            }
+            self.usersContacts = newUsers
         }
     }
     

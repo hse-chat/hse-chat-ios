@@ -26,6 +26,7 @@ public func == (lhs: HseMsg.User, rhs: HseMsg.User) -> Bool {
   }
   var fieldCheck:Bool = (lhs.hashValue == rhs.hashValue)
   fieldCheck = fieldCheck && (lhs.hasUsername == rhs.hasUsername) && (!lhs.hasUsername || lhs.username == rhs.username)
+  fieldCheck = fieldCheck && (lhs.hasOnline == rhs.hasOnline) && (!lhs.hasOnline || lhs.online == rhs.online)
   fieldCheck = (fieldCheck && (lhs.unknownFields == rhs.unknownFields))
   return fieldCheck
 }
@@ -162,18 +163,19 @@ public func == (lhs: HseMsg.Result.SendMessageToUserResult, rhs: HseMsg.Result.S
   return fieldCheck
 }
 
-public func == (lhs: HseMsg.ServerMessage, rhs: HseMsg.ServerMessage) -> Bool {
+public func == (lhs: HseMsg.Event, rhs: HseMsg.Event) -> Bool {
   if (lhs === rhs) {
     return true
   }
   var fieldCheck:Bool = (lhs.hashValue == rhs.hashValue)
-  fieldCheck = fieldCheck && (lhs.hasEvent == rhs.hasEvent) && (!lhs.hasEvent || lhs.event == rhs.event)
-  fieldCheck = fieldCheck && (lhs.hasResult == rhs.hasResult) && (!lhs.hasResult || lhs.result == rhs.result)
+  fieldCheck = fieldCheck && (lhs.hasNewMessage == rhs.hasNewMessage) && (!lhs.hasNewMessage || lhs.newMessage == rhs.newMessage)
+  fieldCheck = fieldCheck && (lhs.hasNewUser == rhs.hasNewUser) && (!lhs.hasNewUser || lhs.newUser == rhs.newUser)
+  fieldCheck = fieldCheck && (lhs.hasUpdateUser == rhs.hasUpdateUser) && (!lhs.hasUpdateUser || lhs.updateUser == rhs.updateUser)
   fieldCheck = (fieldCheck && (lhs.unknownFields == rhs.unknownFields))
   return fieldCheck
 }
 
-public func == (lhs: HseMsg.ServerMessage.NewMessage, rhs: HseMsg.ServerMessage.NewMessage) -> Bool {
+public func == (lhs: HseMsg.Event.NewMessage, rhs: HseMsg.Event.NewMessage) -> Bool {
   if (lhs === rhs) {
     return true
   }
@@ -183,7 +185,7 @@ public func == (lhs: HseMsg.ServerMessage.NewMessage, rhs: HseMsg.ServerMessage.
   return fieldCheck
 }
 
-public func == (lhs: HseMsg.ServerMessage.NewUser, rhs: HseMsg.ServerMessage.NewUser) -> Bool {
+public func == (lhs: HseMsg.Event.NewUser, rhs: HseMsg.Event.NewUser) -> Bool {
   if (lhs === rhs) {
     return true
   }
@@ -193,13 +195,23 @@ public func == (lhs: HseMsg.ServerMessage.NewUser, rhs: HseMsg.ServerMessage.New
   return fieldCheck
 }
 
-public func == (lhs: HseMsg.ServerMessage.Event, rhs: HseMsg.ServerMessage.Event) -> Bool {
+public func == (lhs: HseMsg.Event.UpdateUser, rhs: HseMsg.Event.UpdateUser) -> Bool {
   if (lhs === rhs) {
     return true
   }
   var fieldCheck:Bool = (lhs.hashValue == rhs.hashValue)
-  fieldCheck = fieldCheck && (lhs.hasNewMessage == rhs.hasNewMessage) && (!lhs.hasNewMessage || lhs.newMessage == rhs.newMessage)
-  fieldCheck = fieldCheck && (lhs.hasNewUser == rhs.hasNewUser) && (!lhs.hasNewUser || lhs.newUser == rhs.newUser)
+  fieldCheck = fieldCheck && (lhs.hasUser == rhs.hasUser) && (!lhs.hasUser || lhs.user == rhs.user)
+  fieldCheck = (fieldCheck && (lhs.unknownFields == rhs.unknownFields))
+  return fieldCheck
+}
+
+public func == (lhs: HseMsg.ServerMessage, rhs: HseMsg.ServerMessage) -> Bool {
+  if (lhs === rhs) {
+    return true
+  }
+  var fieldCheck:Bool = (lhs.hashValue == rhs.hashValue)
+  fieldCheck = fieldCheck && (lhs.hasEvent == rhs.hasEvent) && (!lhs.hasEvent || lhs.event == rhs.event)
+  fieldCheck = fieldCheck && (lhs.hasResult == rhs.hasResult) && (!lhs.hasResult || lhs.result == rhs.result)
   fieldCheck = (fieldCheck && (lhs.unknownFields == rhs.unknownFields))
   return fieldCheck
 }
@@ -568,6 +580,9 @@ public extension HseMsg {
     public private(set) var username:String = ""
 
     public private(set) var hasUsername:Bool = false
+    public private(set) var online:Bool = false
+
+    public private(set) var hasOnline:Bool = false
     required public init() {
          super.init()
     }
@@ -581,6 +596,9 @@ public extension HseMsg {
       if hasUsername {
         try output.writeString(1, value:username)
       }
+      if hasOnline {
+        try output.writeBool(2, value:online)
+      }
       try unknownFields.writeToCodedOutputStream(output)
     }
     override public func serializedSize() -> Int32 {
@@ -592,6 +610,9 @@ public extension HseMsg {
       serialize_size = 0
       if hasUsername {
         serialize_size += username.computeStringSize(1)
+      }
+      if hasOnline {
+        serialize_size += online.computeBoolSize(2)
       }
       serialize_size += unknownFields.serializedSize()
       memoizedSerializedSize = serialize_size
@@ -648,6 +669,9 @@ public extension HseMsg {
       if hasUsername {
         output += "\(indent) username: \(username) \n"
       }
+      if hasOnline {
+        output += "\(indent) online: \(online) \n"
+      }
       output += unknownFields.getDescription(indent)
       return output
     }
@@ -656,6 +680,9 @@ public extension HseMsg {
             var hashCode:Int = 7
             if hasUsername {
                hashCode = (hashCode &* 31) &+ username.hashValue
+            }
+            if hasOnline {
+               hashCode = (hashCode &* 31) &+ online.hashValue
             }
             hashCode = (hashCode &* 31) &+  unknownFields.hashValue
             return hashCode
@@ -708,6 +735,29 @@ public extension HseMsg {
            builderResult.username = ""
            return self
       }
+      public var hasOnline:Bool {
+           get {
+                return builderResult.hasOnline
+           }
+      }
+      public var online:Bool {
+           get {
+                return builderResult.online
+           }
+           set (value) {
+               builderResult.hasOnline = true
+               builderResult.online = value
+           }
+      }
+      public func setOnline(value:Bool) -> HseMsg.User.Builder {
+        self.online = value
+        return self
+      }
+      public func clearOnline() -> HseMsg.User.Builder{
+           builderResult.hasOnline = false
+           builderResult.online = false
+           return self
+      }
       override public var internalGetResult:GeneratedMessage {
            get {
               return builderResult
@@ -735,6 +785,9 @@ public extension HseMsg {
         if other.hasUsername {
              username = other.username
         }
+        if other.hasOnline {
+             online = other.online
+        }
         try mergeUnknownFields(other.unknownFields)
         return self
       }
@@ -752,6 +805,9 @@ public extension HseMsg {
 
           case 10 :
             username = try input.readString()
+
+          case 16 :
+            online = try input.readBool()
 
           default:
             if (!(try parseUnknownField(input,unknownFields:unknownFieldsBuilder, extensionRegistry:extensionRegistry, tag:protobufTag))) {
@@ -4598,7 +4654,7 @@ public extension HseMsg {
 
   }
 
-  final public class ServerMessage : GeneratedMessage, GeneratedMessageProtocol {
+  final public class Event : GeneratedMessage, GeneratedMessageProtocol {
 
 
     //Nested type declaration start
@@ -4640,51 +4696,51 @@ public extension HseMsg {
           memoizedSerializedSize = serialize_size
           return serialize_size
         }
-        public class func parseArrayDelimitedFromInputStream(input:NSInputStream) throws -> Array<HseMsg.ServerMessage.NewMessage> {
-          var mergedArray = Array<HseMsg.ServerMessage.NewMessage>()
+        public class func parseArrayDelimitedFromInputStream(input:NSInputStream) throws -> Array<HseMsg.Event.NewMessage> {
+          var mergedArray = Array<HseMsg.Event.NewMessage>()
           while let value = try parseFromDelimitedFromInputStream(input) {
             mergedArray += [value]
           }
           return mergedArray
         }
-        public class func parseFromDelimitedFromInputStream(input:NSInputStream) throws -> HseMsg.ServerMessage.NewMessage? {
-          return try HseMsg.ServerMessage.NewMessage.Builder().mergeDelimitedFromInputStream(input)?.build()
+        public class func parseFromDelimitedFromInputStream(input:NSInputStream) throws -> HseMsg.Event.NewMessage? {
+          return try HseMsg.Event.NewMessage.Builder().mergeDelimitedFromInputStream(input)?.build()
         }
-        public class func parseFromData(data:NSData) throws -> HseMsg.ServerMessage.NewMessage {
-          return try HseMsg.ServerMessage.NewMessage.Builder().mergeFromData(data, extensionRegistry:HseMsg.HseMsgRoot.sharedInstance.extensionRegistry).build()
+        public class func parseFromData(data:NSData) throws -> HseMsg.Event.NewMessage {
+          return try HseMsg.Event.NewMessage.Builder().mergeFromData(data, extensionRegistry:HseMsg.HseMsgRoot.sharedInstance.extensionRegistry).build()
         }
-        public class func parseFromData(data:NSData, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.NewMessage {
-          return try HseMsg.ServerMessage.NewMessage.Builder().mergeFromData(data, extensionRegistry:extensionRegistry).build()
+        public class func parseFromData(data:NSData, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.NewMessage {
+          return try HseMsg.Event.NewMessage.Builder().mergeFromData(data, extensionRegistry:extensionRegistry).build()
         }
-        public class func parseFromInputStream(input:NSInputStream) throws -> HseMsg.ServerMessage.NewMessage {
-          return try HseMsg.ServerMessage.NewMessage.Builder().mergeFromInputStream(input).build()
+        public class func parseFromInputStream(input:NSInputStream) throws -> HseMsg.Event.NewMessage {
+          return try HseMsg.Event.NewMessage.Builder().mergeFromInputStream(input).build()
         }
-        public class func parseFromInputStream(input:NSInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.NewMessage {
-          return try HseMsg.ServerMessage.NewMessage.Builder().mergeFromInputStream(input, extensionRegistry:extensionRegistry).build()
+        public class func parseFromInputStream(input:NSInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.NewMessage {
+          return try HseMsg.Event.NewMessage.Builder().mergeFromInputStream(input, extensionRegistry:extensionRegistry).build()
         }
-        public class func parseFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.ServerMessage.NewMessage {
-          return try HseMsg.ServerMessage.NewMessage.Builder().mergeFromCodedInputStream(input).build()
+        public class func parseFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.Event.NewMessage {
+          return try HseMsg.Event.NewMessage.Builder().mergeFromCodedInputStream(input).build()
         }
-        public class func parseFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.NewMessage {
-          return try HseMsg.ServerMessage.NewMessage.Builder().mergeFromCodedInputStream(input, extensionRegistry:extensionRegistry).build()
+        public class func parseFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.NewMessage {
+          return try HseMsg.Event.NewMessage.Builder().mergeFromCodedInputStream(input, extensionRegistry:extensionRegistry).build()
         }
-        public class func getBuilder() -> HseMsg.ServerMessage.NewMessage.Builder {
-          return HseMsg.ServerMessage.NewMessage.classBuilder() as! HseMsg.ServerMessage.NewMessage.Builder
+        public class func getBuilder() -> HseMsg.Event.NewMessage.Builder {
+          return HseMsg.Event.NewMessage.classBuilder() as! HseMsg.Event.NewMessage.Builder
         }
-        public func getBuilder() -> HseMsg.ServerMessage.NewMessage.Builder {
-          return classBuilder() as! HseMsg.ServerMessage.NewMessage.Builder
+        public func getBuilder() -> HseMsg.Event.NewMessage.Builder {
+          return classBuilder() as! HseMsg.Event.NewMessage.Builder
         }
         public override class func classBuilder() -> MessageBuilder {
-          return HseMsg.ServerMessage.NewMessage.Builder()
+          return HseMsg.Event.NewMessage.Builder()
         }
         public override func classBuilder() -> MessageBuilder {
-          return HseMsg.ServerMessage.NewMessage.Builder()
+          return HseMsg.Event.NewMessage.Builder()
         }
-        public func toBuilder() throws -> HseMsg.ServerMessage.NewMessage.Builder {
-          return try HseMsg.ServerMessage.NewMessage.builderWithPrototype(self)
+        public func toBuilder() throws -> HseMsg.Event.NewMessage.Builder {
+          return try HseMsg.Event.NewMessage.builderWithPrototype(self)
         }
-        public class func builderWithPrototype(prototype:HseMsg.ServerMessage.NewMessage) throws -> HseMsg.ServerMessage.NewMessage.Builder {
-          return try HseMsg.ServerMessage.NewMessage.Builder().mergeFrom(prototype)
+        public class func builderWithPrototype(prototype:HseMsg.Event.NewMessage) throws -> HseMsg.Event.NewMessage.Builder {
+          return try HseMsg.Event.NewMessage.Builder().mergeFrom(prototype)
         }
         override public func getDescription(indent:String) throws -> String {
           var output:String = ""
@@ -4715,19 +4771,19 @@ public extension HseMsg {
         //Meta information declaration start
 
         override public class func className() -> String {
-            return "HseMsg.ServerMessage.NewMessage"
+            return "HseMsg.Event.NewMessage"
         }
         override public func className() -> String {
-            return "HseMsg.ServerMessage.NewMessage"
+            return "HseMsg.Event.NewMessage"
         }
         override public func classMetaType() -> GeneratedMessage.Type {
-            return HseMsg.ServerMessage.NewMessage.self
+            return HseMsg.Event.NewMessage.self
         }
         //Meta information declaration end
 
         final public class Builder : GeneratedMessageBuilder {
-          private var builderResult:HseMsg.ServerMessage.NewMessage = HseMsg.ServerMessage.NewMessage()
-          public func getMessage() -> HseMsg.ServerMessage.NewMessage {
+          private var builderResult:HseMsg.Event.NewMessage = HseMsg.Event.NewMessage()
+          public func getMessage() -> HseMsg.Event.NewMessage {
               return builderResult
           }
 
@@ -4766,11 +4822,11 @@ public extension HseMsg {
             }
             return message_Builder_
           }
-          public func setMessage_(value:HseMsg.Message_!) -> HseMsg.ServerMessage.NewMessage.Builder {
+          public func setMessage_(value:HseMsg.Message_!) -> HseMsg.Event.NewMessage.Builder {
             self.message_ = value
             return self
           }
-          public func mergeMessage_(value:HseMsg.Message_) throws -> HseMsg.ServerMessage.NewMessage.Builder {
+          public func mergeMessage_(value:HseMsg.Message_) throws -> HseMsg.Event.NewMessage.Builder {
             if builderResult.hasMessage_ {
               builderResult.message_ = try HseMsg.Message_.builderWithPrototype(builderResult.message_).mergeFrom(value).buildPartial()
             } else {
@@ -4779,7 +4835,7 @@ public extension HseMsg {
             builderResult.hasMessage_ = true
             return self
           }
-          public func clearMessage_() -> HseMsg.ServerMessage.NewMessage.Builder {
+          public func clearMessage_() -> HseMsg.Event.NewMessage.Builder {
             message_Builder_ = nil
             builderResult.hasMessage_ = false
             builderResult.message_ = nil
@@ -4790,23 +4846,23 @@ public extension HseMsg {
                   return builderResult
                }
           }
-          public override func clear() -> HseMsg.ServerMessage.NewMessage.Builder {
-            builderResult = HseMsg.ServerMessage.NewMessage()
+          public override func clear() -> HseMsg.Event.NewMessage.Builder {
+            builderResult = HseMsg.Event.NewMessage()
             return self
           }
-          public override func clone() throws -> HseMsg.ServerMessage.NewMessage.Builder {
-            return try HseMsg.ServerMessage.NewMessage.builderWithPrototype(builderResult)
+          public override func clone() throws -> HseMsg.Event.NewMessage.Builder {
+            return try HseMsg.Event.NewMessage.builderWithPrototype(builderResult)
           }
-          public override func build() throws -> HseMsg.ServerMessage.NewMessage {
+          public override func build() throws -> HseMsg.Event.NewMessage {
                try checkInitialized()
                return buildPartial()
           }
-          public func buildPartial() -> HseMsg.ServerMessage.NewMessage {
-            let returnMe:HseMsg.ServerMessage.NewMessage = builderResult
+          public func buildPartial() -> HseMsg.Event.NewMessage {
+            let returnMe:HseMsg.Event.NewMessage = builderResult
             return returnMe
           }
-          public func mergeFrom(other:HseMsg.ServerMessage.NewMessage) throws -> HseMsg.ServerMessage.NewMessage.Builder {
-            if other == HseMsg.ServerMessage.NewMessage() {
+          public func mergeFrom(other:HseMsg.Event.NewMessage) throws -> HseMsg.Event.NewMessage.Builder {
+            if other == HseMsg.Event.NewMessage() {
              return self
             }
             if (other.hasMessage_) {
@@ -4815,10 +4871,10 @@ public extension HseMsg {
             try mergeUnknownFields(other.unknownFields)
             return self
           }
-          public override func mergeFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.ServerMessage.NewMessage.Builder {
+          public override func mergeFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.Event.NewMessage.Builder {
                return try mergeFromCodedInputStream(input, extensionRegistry:ExtensionRegistry())
           }
-          public override func mergeFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.NewMessage.Builder {
+          public override func mergeFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.NewMessage.Builder {
             let unknownFieldsBuilder:UnknownFieldSet.Builder = try UnknownFieldSet.builderWithUnknownFields(self.unknownFields)
             while (true) {
               let protobufTag = try input.readTag()
@@ -4890,51 +4946,51 @@ public extension HseMsg {
           memoizedSerializedSize = serialize_size
           return serialize_size
         }
-        public class func parseArrayDelimitedFromInputStream(input:NSInputStream) throws -> Array<HseMsg.ServerMessage.NewUser> {
-          var mergedArray = Array<HseMsg.ServerMessage.NewUser>()
+        public class func parseArrayDelimitedFromInputStream(input:NSInputStream) throws -> Array<HseMsg.Event.NewUser> {
+          var mergedArray = Array<HseMsg.Event.NewUser>()
           while let value = try parseFromDelimitedFromInputStream(input) {
             mergedArray += [value]
           }
           return mergedArray
         }
-        public class func parseFromDelimitedFromInputStream(input:NSInputStream) throws -> HseMsg.ServerMessage.NewUser? {
-          return try HseMsg.ServerMessage.NewUser.Builder().mergeDelimitedFromInputStream(input)?.build()
+        public class func parseFromDelimitedFromInputStream(input:NSInputStream) throws -> HseMsg.Event.NewUser? {
+          return try HseMsg.Event.NewUser.Builder().mergeDelimitedFromInputStream(input)?.build()
         }
-        public class func parseFromData(data:NSData) throws -> HseMsg.ServerMessage.NewUser {
-          return try HseMsg.ServerMessage.NewUser.Builder().mergeFromData(data, extensionRegistry:HseMsg.HseMsgRoot.sharedInstance.extensionRegistry).build()
+        public class func parseFromData(data:NSData) throws -> HseMsg.Event.NewUser {
+          return try HseMsg.Event.NewUser.Builder().mergeFromData(data, extensionRegistry:HseMsg.HseMsgRoot.sharedInstance.extensionRegistry).build()
         }
-        public class func parseFromData(data:NSData, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.NewUser {
-          return try HseMsg.ServerMessage.NewUser.Builder().mergeFromData(data, extensionRegistry:extensionRegistry).build()
+        public class func parseFromData(data:NSData, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.NewUser {
+          return try HseMsg.Event.NewUser.Builder().mergeFromData(data, extensionRegistry:extensionRegistry).build()
         }
-        public class func parseFromInputStream(input:NSInputStream) throws -> HseMsg.ServerMessage.NewUser {
-          return try HseMsg.ServerMessage.NewUser.Builder().mergeFromInputStream(input).build()
+        public class func parseFromInputStream(input:NSInputStream) throws -> HseMsg.Event.NewUser {
+          return try HseMsg.Event.NewUser.Builder().mergeFromInputStream(input).build()
         }
-        public class func parseFromInputStream(input:NSInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.NewUser {
-          return try HseMsg.ServerMessage.NewUser.Builder().mergeFromInputStream(input, extensionRegistry:extensionRegistry).build()
+        public class func parseFromInputStream(input:NSInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.NewUser {
+          return try HseMsg.Event.NewUser.Builder().mergeFromInputStream(input, extensionRegistry:extensionRegistry).build()
         }
-        public class func parseFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.ServerMessage.NewUser {
-          return try HseMsg.ServerMessage.NewUser.Builder().mergeFromCodedInputStream(input).build()
+        public class func parseFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.Event.NewUser {
+          return try HseMsg.Event.NewUser.Builder().mergeFromCodedInputStream(input).build()
         }
-        public class func parseFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.NewUser {
-          return try HseMsg.ServerMessage.NewUser.Builder().mergeFromCodedInputStream(input, extensionRegistry:extensionRegistry).build()
+        public class func parseFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.NewUser {
+          return try HseMsg.Event.NewUser.Builder().mergeFromCodedInputStream(input, extensionRegistry:extensionRegistry).build()
         }
-        public class func getBuilder() -> HseMsg.ServerMessage.NewUser.Builder {
-          return HseMsg.ServerMessage.NewUser.classBuilder() as! HseMsg.ServerMessage.NewUser.Builder
+        public class func getBuilder() -> HseMsg.Event.NewUser.Builder {
+          return HseMsg.Event.NewUser.classBuilder() as! HseMsg.Event.NewUser.Builder
         }
-        public func getBuilder() -> HseMsg.ServerMessage.NewUser.Builder {
-          return classBuilder() as! HseMsg.ServerMessage.NewUser.Builder
+        public func getBuilder() -> HseMsg.Event.NewUser.Builder {
+          return classBuilder() as! HseMsg.Event.NewUser.Builder
         }
         public override class func classBuilder() -> MessageBuilder {
-          return HseMsg.ServerMessage.NewUser.Builder()
+          return HseMsg.Event.NewUser.Builder()
         }
         public override func classBuilder() -> MessageBuilder {
-          return HseMsg.ServerMessage.NewUser.Builder()
+          return HseMsg.Event.NewUser.Builder()
         }
-        public func toBuilder() throws -> HseMsg.ServerMessage.NewUser.Builder {
-          return try HseMsg.ServerMessage.NewUser.builderWithPrototype(self)
+        public func toBuilder() throws -> HseMsg.Event.NewUser.Builder {
+          return try HseMsg.Event.NewUser.builderWithPrototype(self)
         }
-        public class func builderWithPrototype(prototype:HseMsg.ServerMessage.NewUser) throws -> HseMsg.ServerMessage.NewUser.Builder {
-          return try HseMsg.ServerMessage.NewUser.Builder().mergeFrom(prototype)
+        public class func builderWithPrototype(prototype:HseMsg.Event.NewUser) throws -> HseMsg.Event.NewUser.Builder {
+          return try HseMsg.Event.NewUser.Builder().mergeFrom(prototype)
         }
         override public func getDescription(indent:String) throws -> String {
           var output:String = ""
@@ -4965,19 +5021,19 @@ public extension HseMsg {
         //Meta information declaration start
 
         override public class func className() -> String {
-            return "HseMsg.ServerMessage.NewUser"
+            return "HseMsg.Event.NewUser"
         }
         override public func className() -> String {
-            return "HseMsg.ServerMessage.NewUser"
+            return "HseMsg.Event.NewUser"
         }
         override public func classMetaType() -> GeneratedMessage.Type {
-            return HseMsg.ServerMessage.NewUser.self
+            return HseMsg.Event.NewUser.self
         }
         //Meta information declaration end
 
         final public class Builder : GeneratedMessageBuilder {
-          private var builderResult:HseMsg.ServerMessage.NewUser = HseMsg.ServerMessage.NewUser()
-          public func getMessage() -> HseMsg.ServerMessage.NewUser {
+          private var builderResult:HseMsg.Event.NewUser = HseMsg.Event.NewUser()
+          public func getMessage() -> HseMsg.Event.NewUser {
               return builderResult
           }
 
@@ -5016,11 +5072,11 @@ public extension HseMsg {
             }
             return userBuilder_
           }
-          public func setUser(value:HseMsg.User!) -> HseMsg.ServerMessage.NewUser.Builder {
+          public func setUser(value:HseMsg.User!) -> HseMsg.Event.NewUser.Builder {
             self.user = value
             return self
           }
-          public func mergeUser(value:HseMsg.User) throws -> HseMsg.ServerMessage.NewUser.Builder {
+          public func mergeUser(value:HseMsg.User) throws -> HseMsg.Event.NewUser.Builder {
             if builderResult.hasUser {
               builderResult.user = try HseMsg.User.builderWithPrototype(builderResult.user).mergeFrom(value).buildPartial()
             } else {
@@ -5029,7 +5085,7 @@ public extension HseMsg {
             builderResult.hasUser = true
             return self
           }
-          public func clearUser() -> HseMsg.ServerMessage.NewUser.Builder {
+          public func clearUser() -> HseMsg.Event.NewUser.Builder {
             userBuilder_ = nil
             builderResult.hasUser = false
             builderResult.user = nil
@@ -5040,23 +5096,23 @@ public extension HseMsg {
                   return builderResult
                }
           }
-          public override func clear() -> HseMsg.ServerMessage.NewUser.Builder {
-            builderResult = HseMsg.ServerMessage.NewUser()
+          public override func clear() -> HseMsg.Event.NewUser.Builder {
+            builderResult = HseMsg.Event.NewUser()
             return self
           }
-          public override func clone() throws -> HseMsg.ServerMessage.NewUser.Builder {
-            return try HseMsg.ServerMessage.NewUser.builderWithPrototype(builderResult)
+          public override func clone() throws -> HseMsg.Event.NewUser.Builder {
+            return try HseMsg.Event.NewUser.builderWithPrototype(builderResult)
           }
-          public override func build() throws -> HseMsg.ServerMessage.NewUser {
+          public override func build() throws -> HseMsg.Event.NewUser {
                try checkInitialized()
                return buildPartial()
           }
-          public func buildPartial() -> HseMsg.ServerMessage.NewUser {
-            let returnMe:HseMsg.ServerMessage.NewUser = builderResult
+          public func buildPartial() -> HseMsg.Event.NewUser {
+            let returnMe:HseMsg.Event.NewUser = builderResult
             return returnMe
           }
-          public func mergeFrom(other:HseMsg.ServerMessage.NewUser) throws -> HseMsg.ServerMessage.NewUser.Builder {
-            if other == HseMsg.ServerMessage.NewUser() {
+          public func mergeFrom(other:HseMsg.Event.NewUser) throws -> HseMsg.Event.NewUser.Builder {
+            if other == HseMsg.Event.NewUser() {
              return self
             }
             if (other.hasUser) {
@@ -5065,10 +5121,10 @@ public extension HseMsg {
             try mergeUnknownFields(other.unknownFields)
             return self
           }
-          public override func mergeFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.ServerMessage.NewUser.Builder {
+          public override func mergeFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.Event.NewUser.Builder {
                return try mergeFromCodedInputStream(input, extensionRegistry:ExtensionRegistry())
           }
-          public override func mergeFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.NewUser.Builder {
+          public override func mergeFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.NewUser.Builder {
             let unknownFieldsBuilder:UnknownFieldSet.Builder = try UnknownFieldSet.builderWithUnknownFields(self.unknownFields)
             while (true) {
               let protobufTag = try input.readTag()
@@ -5103,104 +5159,24 @@ public extension HseMsg {
 
     //Nested type declaration start
 
-      final public class Event : GeneratedMessage, GeneratedMessageProtocol {
-
-
-        //OneOf declaration start
-
-        public enum Event {
-          case EventOneOfNotSet
-
-          public func checkOneOfIsSet() -> Bool {
-               switch self {
-               case .EventOneOfNotSet:
-                    return false
-               default:
-                    return true
-               }
-          }
-          case NewMessage(HseMsg.ServerMessage.NewMessage)
-
-          public static func getNewMessage(value:Event) -> HseMsg.ServerMessage.NewMessage? {
-               switch value {
-               case .NewMessage(let enumValue):
-                    return enumValue
-               default:
-                    return nil
-               }
-          }
-          case NewUser(HseMsg.ServerMessage.NewUser)
-
-          public static func getNewUser(value:Event) -> HseMsg.ServerMessage.NewUser? {
-               switch value {
-               case .NewUser(let enumValue):
-                    return enumValue
-               default:
-                    return nil
-               }
-          }
-        }
-        //OneOf declaration end
-
-        private var storageEvent:ServerMessage.Event.Event =  ServerMessage.Event.Event.EventOneOfNotSet
-        public private(set) var newMessage:HseMsg.ServerMessage.NewMessage!{
-             get {
-                  return ServerMessage.Event.Event.getNewMessage(storageEvent)
-             }
-             set (newvalue) {
-                  storageEvent = ServerMessage.Event.Event.NewMessage(newvalue)
-             }
-        }
-        public private(set) var hasNewMessage:Bool {
-              get {
-                   if ServerMessage.Event.Event.getNewMessage(storageEvent) == nil {
-                       return false
-                   }
-                   return true
-              }
-              set(newValue) {
-              }
-        }
-        public private(set) var newUser:HseMsg.ServerMessage.NewUser!{
-             get {
-                  return ServerMessage.Event.Event.getNewUser(storageEvent)
-             }
-             set (newvalue) {
-                  storageEvent = ServerMessage.Event.Event.NewUser(newvalue)
-             }
-        }
-        public private(set) var hasNewUser:Bool {
-              get {
-                   if ServerMessage.Event.Event.getNewUser(storageEvent) == nil {
-                       return false
-                   }
-                   return true
-              }
-              set(newValue) {
-              }
-        }
+      final public class UpdateUser : GeneratedMessage, GeneratedMessageProtocol {
+        public private(set) var user:HseMsg.User!
+        public private(set) var hasUser:Bool = false
         required public init() {
              super.init()
         }
         override public func isInitialized() -> Bool {
-          if hasNewMessage {
-           if !newMessage.isInitialized() {
-             return false
-           }
+          if !hasUser {
+            return false
           }
-          if hasNewUser {
-           if !newUser.isInitialized() {
-             return false
-           }
+          if !user.isInitialized() {
+            return false
           }
          return true
         }
         override public func writeToCodedOutputStream(output:CodedOutputStream) throws {
-          if hasNewMessage {
-            try output.writeMessage(1, value:newMessage)
-          }
-          if hasNewUser {
-            try output.writeMessage(2, value:newUser)
+          if hasUser {
+            try output.writeMessage(1, value:user)
           }
           try unknownFields.writeToCodedOutputStream(output)
         }
@@ -5211,79 +5187,67 @@ public extension HseMsg {
           }
 
           serialize_size = 0
-          if hasNewMessage {
-              if let varSizenewMessage = newMessage?.computeMessageSize(1) {
-                  serialize_size += varSizenewMessage
-              }
-          }
-          if hasNewUser {
-              if let varSizenewUser = newUser?.computeMessageSize(2) {
-                  serialize_size += varSizenewUser
+          if hasUser {
+              if let varSizeuser = user?.computeMessageSize(1) {
+                  serialize_size += varSizeuser
               }
           }
           serialize_size += unknownFields.serializedSize()
           memoizedSerializedSize = serialize_size
           return serialize_size
         }
-        public class func parseArrayDelimitedFromInputStream(input:NSInputStream) throws -> Array<HseMsg.ServerMessage.Event> {
-          var mergedArray = Array<HseMsg.ServerMessage.Event>()
+        public class func parseArrayDelimitedFromInputStream(input:NSInputStream) throws -> Array<HseMsg.Event.UpdateUser> {
+          var mergedArray = Array<HseMsg.Event.UpdateUser>()
           while let value = try parseFromDelimitedFromInputStream(input) {
             mergedArray += [value]
           }
           return mergedArray
         }
-        public class func parseFromDelimitedFromInputStream(input:NSInputStream) throws -> HseMsg.ServerMessage.Event? {
-          return try HseMsg.ServerMessage.Event.Builder().mergeDelimitedFromInputStream(input)?.build()
+        public class func parseFromDelimitedFromInputStream(input:NSInputStream) throws -> HseMsg.Event.UpdateUser? {
+          return try HseMsg.Event.UpdateUser.Builder().mergeDelimitedFromInputStream(input)?.build()
         }
-        public class func parseFromData(data:NSData) throws -> HseMsg.ServerMessage.Event {
-          return try HseMsg.ServerMessage.Event.Builder().mergeFromData(data, extensionRegistry:HseMsg.HseMsgRoot.sharedInstance.extensionRegistry).build()
+        public class func parseFromData(data:NSData) throws -> HseMsg.Event.UpdateUser {
+          return try HseMsg.Event.UpdateUser.Builder().mergeFromData(data, extensionRegistry:HseMsg.HseMsgRoot.sharedInstance.extensionRegistry).build()
         }
-        public class func parseFromData(data:NSData, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.Event {
-          return try HseMsg.ServerMessage.Event.Builder().mergeFromData(data, extensionRegistry:extensionRegistry).build()
+        public class func parseFromData(data:NSData, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.UpdateUser {
+          return try HseMsg.Event.UpdateUser.Builder().mergeFromData(data, extensionRegistry:extensionRegistry).build()
         }
-        public class func parseFromInputStream(input:NSInputStream) throws -> HseMsg.ServerMessage.Event {
-          return try HseMsg.ServerMessage.Event.Builder().mergeFromInputStream(input).build()
+        public class func parseFromInputStream(input:NSInputStream) throws -> HseMsg.Event.UpdateUser {
+          return try HseMsg.Event.UpdateUser.Builder().mergeFromInputStream(input).build()
         }
-        public class func parseFromInputStream(input:NSInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.Event {
-          return try HseMsg.ServerMessage.Event.Builder().mergeFromInputStream(input, extensionRegistry:extensionRegistry).build()
+        public class func parseFromInputStream(input:NSInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.UpdateUser {
+          return try HseMsg.Event.UpdateUser.Builder().mergeFromInputStream(input, extensionRegistry:extensionRegistry).build()
         }
-        public class func parseFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.ServerMessage.Event {
-          return try HseMsg.ServerMessage.Event.Builder().mergeFromCodedInputStream(input).build()
+        public class func parseFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.Event.UpdateUser {
+          return try HseMsg.Event.UpdateUser.Builder().mergeFromCodedInputStream(input).build()
         }
-        public class func parseFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.Event {
-          return try HseMsg.ServerMessage.Event.Builder().mergeFromCodedInputStream(input, extensionRegistry:extensionRegistry).build()
+        public class func parseFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.UpdateUser {
+          return try HseMsg.Event.UpdateUser.Builder().mergeFromCodedInputStream(input, extensionRegistry:extensionRegistry).build()
         }
-        public class func getBuilder() -> HseMsg.ServerMessage.Event.Builder {
-          return HseMsg.ServerMessage.Event.classBuilder() as! HseMsg.ServerMessage.Event.Builder
+        public class func getBuilder() -> HseMsg.Event.UpdateUser.Builder {
+          return HseMsg.Event.UpdateUser.classBuilder() as! HseMsg.Event.UpdateUser.Builder
         }
-        public func getBuilder() -> HseMsg.ServerMessage.Event.Builder {
-          return classBuilder() as! HseMsg.ServerMessage.Event.Builder
+        public func getBuilder() -> HseMsg.Event.UpdateUser.Builder {
+          return classBuilder() as! HseMsg.Event.UpdateUser.Builder
         }
         public override class func classBuilder() -> MessageBuilder {
-          return HseMsg.ServerMessage.Event.Builder()
+          return HseMsg.Event.UpdateUser.Builder()
         }
         public override func classBuilder() -> MessageBuilder {
-          return HseMsg.ServerMessage.Event.Builder()
+          return HseMsg.Event.UpdateUser.Builder()
         }
-        public func toBuilder() throws -> HseMsg.ServerMessage.Event.Builder {
-          return try HseMsg.ServerMessage.Event.builderWithPrototype(self)
+        public func toBuilder() throws -> HseMsg.Event.UpdateUser.Builder {
+          return try HseMsg.Event.UpdateUser.builderWithPrototype(self)
         }
-        public class func builderWithPrototype(prototype:HseMsg.ServerMessage.Event) throws -> HseMsg.ServerMessage.Event.Builder {
-          return try HseMsg.ServerMessage.Event.Builder().mergeFrom(prototype)
+        public class func builderWithPrototype(prototype:HseMsg.Event.UpdateUser) throws -> HseMsg.Event.UpdateUser.Builder {
+          return try HseMsg.Event.UpdateUser.Builder().mergeFrom(prototype)
         }
         override public func getDescription(indent:String) throws -> String {
           var output:String = ""
-          if hasNewMessage {
-            output += "\(indent) newMessage {\n"
-            if let outDescNewMessage = newMessage {
-              output += try outDescNewMessage.getDescription("\(indent)  ")
-            }
-            output += "\(indent) }\n"
-          }
-          if hasNewUser {
-            output += "\(indent) newUser {\n"
-            if let outDescNewUser = newUser {
-              output += try outDescNewUser.getDescription("\(indent)  ")
+          if hasUser {
+            output += "\(indent) user {\n"
+            if let outDescUser = user {
+              output += try outDescUser.getDescription("\(indent)  ")
             }
             output += "\(indent) }\n"
           }
@@ -5293,14 +5257,9 @@ public extension HseMsg {
         override public var hashValue:Int {
             get {
                 var hashCode:Int = 7
-                if hasNewMessage {
-                    if let hashValuenewMessage = newMessage?.hashValue {
-                        hashCode = (hashCode &* 31) &+ hashValuenewMessage
-                    }
-                }
-                if hasNewUser {
-                    if let hashValuenewUser = newUser?.hashValue {
-                        hashCode = (hashCode &* 31) &+ hashValuenewUser
+                if hasUser {
+                    if let hashValueuser = user?.hashValue {
+                        hashCode = (hashCode &* 31) &+ hashValueuser
                     }
                 }
                 hashCode = (hashCode &* 31) &+  unknownFields.hashValue
@@ -5312,125 +5271,74 @@ public extension HseMsg {
         //Meta information declaration start
 
         override public class func className() -> String {
-            return "HseMsg.ServerMessage.Event"
+            return "HseMsg.Event.UpdateUser"
         }
         override public func className() -> String {
-            return "HseMsg.ServerMessage.Event"
+            return "HseMsg.Event.UpdateUser"
         }
         override public func classMetaType() -> GeneratedMessage.Type {
-            return HseMsg.ServerMessage.Event.self
+            return HseMsg.Event.UpdateUser.self
         }
         //Meta information declaration end
 
         final public class Builder : GeneratedMessageBuilder {
-          private var builderResult:HseMsg.ServerMessage.Event = HseMsg.ServerMessage.Event()
-          public func getMessage() -> HseMsg.ServerMessage.Event {
+          private var builderResult:HseMsg.Event.UpdateUser = HseMsg.Event.UpdateUser()
+          public func getMessage() -> HseMsg.Event.UpdateUser {
               return builderResult
           }
 
           required override public init () {
              super.init()
           }
-          public var hasNewMessage:Bool {
+          public var hasUser:Bool {
                get {
-                   return builderResult.hasNewMessage
+                   return builderResult.hasUser
                }
           }
-          public var newMessage:HseMsg.ServerMessage.NewMessage! {
+          public var user:HseMsg.User! {
                get {
-                   if newMessageBuilder_ != nil {
-                      builderResult.newMessage = newMessageBuilder_.getMessage()
+                   if userBuilder_ != nil {
+                      builderResult.user = userBuilder_.getMessage()
                    }
-                   return builderResult.newMessage
+                   return builderResult.user
                }
                set (value) {
-                   builderResult.hasNewMessage = true
-                   builderResult.newMessage = value
+                   builderResult.hasUser = true
+                   builderResult.user = value
                }
           }
-          private var newMessageBuilder_:HseMsg.ServerMessage.NewMessage.Builder! {
+          private var userBuilder_:HseMsg.User.Builder! {
                didSet {
-                  builderResult.hasNewMessage = true
+                  builderResult.hasUser = true
                }
           }
-          public func getNewMessageBuilder() -> HseMsg.ServerMessage.NewMessage.Builder {
-            if newMessageBuilder_ == nil {
-               newMessageBuilder_ = HseMsg.ServerMessage.NewMessage.Builder()
-               builderResult.newMessage = newMessageBuilder_.getMessage()
-               if newMessage != nil {
-                  try! newMessageBuilder_.mergeFrom(newMessage)
+          public func getUserBuilder() -> HseMsg.User.Builder {
+            if userBuilder_ == nil {
+               userBuilder_ = HseMsg.User.Builder()
+               builderResult.user = userBuilder_.getMessage()
+               if user != nil {
+                  try! userBuilder_.mergeFrom(user)
                }
             }
-            return newMessageBuilder_
+            return userBuilder_
           }
-          public func setNewMessage(value:HseMsg.ServerMessage.NewMessage!) -> HseMsg.ServerMessage.Event.Builder {
-            self.newMessage = value
+          public func setUser(value:HseMsg.User!) -> HseMsg.Event.UpdateUser.Builder {
+            self.user = value
             return self
           }
-          public func mergeNewMessage(value:HseMsg.ServerMessage.NewMessage) throws -> HseMsg.ServerMessage.Event.Builder {
-            if builderResult.hasNewMessage {
-              builderResult.newMessage = try HseMsg.ServerMessage.NewMessage.builderWithPrototype(builderResult.newMessage).mergeFrom(value).buildPartial()
+          public func mergeUser(value:HseMsg.User) throws -> HseMsg.Event.UpdateUser.Builder {
+            if builderResult.hasUser {
+              builderResult.user = try HseMsg.User.builderWithPrototype(builderResult.user).mergeFrom(value).buildPartial()
             } else {
-              builderResult.newMessage = value
+              builderResult.user = value
             }
-            builderResult.hasNewMessage = true
+            builderResult.hasUser = true
             return self
           }
-          public func clearNewMessage() -> HseMsg.ServerMessage.Event.Builder {
-            newMessageBuilder_ = nil
-            builderResult.hasNewMessage = false
-            builderResult.newMessage = nil
-            return self
-          }
-          public var hasNewUser:Bool {
-               get {
-                   return builderResult.hasNewUser
-               }
-          }
-          public var newUser:HseMsg.ServerMessage.NewUser! {
-               get {
-                   if newUserBuilder_ != nil {
-                      builderResult.newUser = newUserBuilder_.getMessage()
-                   }
-                   return builderResult.newUser
-               }
-               set (value) {
-                   builderResult.hasNewUser = true
-                   builderResult.newUser = value
-               }
-          }
-          private var newUserBuilder_:HseMsg.ServerMessage.NewUser.Builder! {
-               didSet {
-                  builderResult.hasNewUser = true
-               }
-          }
-          public func getNewUserBuilder() -> HseMsg.ServerMessage.NewUser.Builder {
-            if newUserBuilder_ == nil {
-               newUserBuilder_ = HseMsg.ServerMessage.NewUser.Builder()
-               builderResult.newUser = newUserBuilder_.getMessage()
-               if newUser != nil {
-                  try! newUserBuilder_.mergeFrom(newUser)
-               }
-            }
-            return newUserBuilder_
-          }
-          public func setNewUser(value:HseMsg.ServerMessage.NewUser!) -> HseMsg.ServerMessage.Event.Builder {
-            self.newUser = value
-            return self
-          }
-          public func mergeNewUser(value:HseMsg.ServerMessage.NewUser) throws -> HseMsg.ServerMessage.Event.Builder {
-            if builderResult.hasNewUser {
-              builderResult.newUser = try HseMsg.ServerMessage.NewUser.builderWithPrototype(builderResult.newUser).mergeFrom(value).buildPartial()
-            } else {
-              builderResult.newUser = value
-            }
-            builderResult.hasNewUser = true
-            return self
-          }
-          public func clearNewUser() -> HseMsg.ServerMessage.Event.Builder {
-            newUserBuilder_ = nil
-            builderResult.hasNewUser = false
-            builderResult.newUser = nil
+          public func clearUser() -> HseMsg.Event.UpdateUser.Builder {
+            userBuilder_ = nil
+            builderResult.hasUser = false
+            builderResult.user = nil
             return self
           }
           override public var internalGetResult:GeneratedMessage {
@@ -5438,38 +5346,35 @@ public extension HseMsg {
                   return builderResult
                }
           }
-          public override func clear() -> HseMsg.ServerMessage.Event.Builder {
-            builderResult = HseMsg.ServerMessage.Event()
+          public override func clear() -> HseMsg.Event.UpdateUser.Builder {
+            builderResult = HseMsg.Event.UpdateUser()
             return self
           }
-          public override func clone() throws -> HseMsg.ServerMessage.Event.Builder {
-            return try HseMsg.ServerMessage.Event.builderWithPrototype(builderResult)
+          public override func clone() throws -> HseMsg.Event.UpdateUser.Builder {
+            return try HseMsg.Event.UpdateUser.builderWithPrototype(builderResult)
           }
-          public override func build() throws -> HseMsg.ServerMessage.Event {
+          public override func build() throws -> HseMsg.Event.UpdateUser {
                try checkInitialized()
                return buildPartial()
           }
-          public func buildPartial() -> HseMsg.ServerMessage.Event {
-            let returnMe:HseMsg.ServerMessage.Event = builderResult
+          public func buildPartial() -> HseMsg.Event.UpdateUser {
+            let returnMe:HseMsg.Event.UpdateUser = builderResult
             return returnMe
           }
-          public func mergeFrom(other:HseMsg.ServerMessage.Event) throws -> HseMsg.ServerMessage.Event.Builder {
-            if other == HseMsg.ServerMessage.Event() {
+          public func mergeFrom(other:HseMsg.Event.UpdateUser) throws -> HseMsg.Event.UpdateUser.Builder {
+            if other == HseMsg.Event.UpdateUser() {
              return self
             }
-            if (other.hasNewMessage) {
-                try mergeNewMessage(other.newMessage)
-            }
-            if (other.hasNewUser) {
-                try mergeNewUser(other.newUser)
+            if (other.hasUser) {
+                try mergeUser(other.user)
             }
             try mergeUnknownFields(other.unknownFields)
             return self
           }
-          public override func mergeFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.ServerMessage.Event.Builder {
+          public override func mergeFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.Event.UpdateUser.Builder {
                return try mergeFromCodedInputStream(input, extensionRegistry:ExtensionRegistry())
           }
-          public override func mergeFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.ServerMessage.Event.Builder {
+          public override func mergeFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.UpdateUser.Builder {
             let unknownFieldsBuilder:UnknownFieldSet.Builder = try UnknownFieldSet.builderWithUnknownFields(self.unknownFields)
             while (true) {
               let protobufTag = try input.readTag()
@@ -5479,20 +5384,12 @@ public extension HseMsg {
                 return self
 
               case 10 :
-                let subBuilder:HseMsg.ServerMessage.NewMessage.Builder = HseMsg.ServerMessage.NewMessage.Builder()
-                if hasNewMessage {
-                  try subBuilder.mergeFrom(newMessage)
+                let subBuilder:HseMsg.User.Builder = HseMsg.User.Builder()
+                if hasUser {
+                  try subBuilder.mergeFrom(user)
                 }
                 try input.readMessage(subBuilder, extensionRegistry:extensionRegistry)
-                newMessage = subBuilder.buildPartial()
-
-              case 18 :
-                let subBuilder:HseMsg.ServerMessage.NewUser.Builder = HseMsg.ServerMessage.NewUser.Builder()
-                if hasNewUser {
-                  try subBuilder.mergeFrom(newUser)
-                }
-                try input.readMessage(subBuilder, extensionRegistry:extensionRegistry)
-                newUser = subBuilder.buildPartial()
+                user = subBuilder.buildPartial()
 
               default:
                 if (!(try parseUnknownField(input,unknownFields:unknownFieldsBuilder, extensionRegistry:extensionRegistry, tag:protobufTag))) {
@@ -5512,6 +5409,524 @@ public extension HseMsg {
 
     //OneOf declaration start
 
+    public enum Value {
+      case ValueOneOfNotSet
+
+      public func checkOneOfIsSet() -> Bool {
+           switch self {
+           case .ValueOneOfNotSet:
+                return false
+           default:
+                return true
+           }
+      }
+      case NewMessage(HseMsg.Event.NewMessage)
+
+      public static func getNewMessage(value:Value) -> HseMsg.Event.NewMessage? {
+           switch value {
+           case .NewMessage(let enumValue):
+                return enumValue
+           default:
+                return nil
+           }
+      }
+      case NewUser(HseMsg.Event.NewUser)
+
+      public static func getNewUser(value:Value) -> HseMsg.Event.NewUser? {
+           switch value {
+           case .NewUser(let enumValue):
+                return enumValue
+           default:
+                return nil
+           }
+      }
+      case UpdateUser(HseMsg.Event.UpdateUser)
+
+      public static func getUpdateUser(value:Value) -> HseMsg.Event.UpdateUser? {
+           switch value {
+           case .UpdateUser(let enumValue):
+                return enumValue
+           default:
+                return nil
+           }
+      }
+    }
+    //OneOf declaration end
+
+    private var storageValue:Event.Value =  Event.Value.ValueOneOfNotSet
+    public private(set) var newMessage:HseMsg.Event.NewMessage!{
+         get {
+              return Event.Value.getNewMessage(storageValue)
+         }
+         set (newvalue) {
+              storageValue = Event.Value.NewMessage(newvalue)
+         }
+    }
+    public private(set) var hasNewMessage:Bool {
+          get {
+               if Event.Value.getNewMessage(storageValue) == nil {
+                   return false
+               }
+               return true
+          }
+          set(newValue) {
+          }
+    }
+    public private(set) var newUser:HseMsg.Event.NewUser!{
+         get {
+              return Event.Value.getNewUser(storageValue)
+         }
+         set (newvalue) {
+              storageValue = Event.Value.NewUser(newvalue)
+         }
+    }
+    public private(set) var hasNewUser:Bool {
+          get {
+               if Event.Value.getNewUser(storageValue) == nil {
+                   return false
+               }
+               return true
+          }
+          set(newValue) {
+          }
+    }
+    public private(set) var updateUser:HseMsg.Event.UpdateUser!{
+         get {
+              return Event.Value.getUpdateUser(storageValue)
+         }
+         set (newvalue) {
+              storageValue = Event.Value.UpdateUser(newvalue)
+         }
+    }
+    public private(set) var hasUpdateUser:Bool {
+          get {
+               if Event.Value.getUpdateUser(storageValue) == nil {
+                   return false
+               }
+               return true
+          }
+          set(newValue) {
+          }
+    }
+    required public init() {
+         super.init()
+    }
+    override public func isInitialized() -> Bool {
+      if hasNewMessage {
+       if !newMessage.isInitialized() {
+         return false
+       }
+      }
+      if hasNewUser {
+       if !newUser.isInitialized() {
+         return false
+       }
+      }
+      if hasUpdateUser {
+       if !updateUser.isInitialized() {
+         return false
+       }
+      }
+     return true
+    }
+    override public func writeToCodedOutputStream(output:CodedOutputStream) throws {
+      if hasNewMessage {
+        try output.writeMessage(1, value:newMessage)
+      }
+      if hasNewUser {
+        try output.writeMessage(2, value:newUser)
+      }
+      if hasUpdateUser {
+        try output.writeMessage(3, value:updateUser)
+      }
+      try unknownFields.writeToCodedOutputStream(output)
+    }
+    override public func serializedSize() -> Int32 {
+      var serialize_size:Int32 = memoizedSerializedSize
+      if serialize_size != -1 {
+       return serialize_size
+      }
+
+      serialize_size = 0
+      if hasNewMessage {
+          if let varSizenewMessage = newMessage?.computeMessageSize(1) {
+              serialize_size += varSizenewMessage
+          }
+      }
+      if hasNewUser {
+          if let varSizenewUser = newUser?.computeMessageSize(2) {
+              serialize_size += varSizenewUser
+          }
+      }
+      if hasUpdateUser {
+          if let varSizeupdateUser = updateUser?.computeMessageSize(3) {
+              serialize_size += varSizeupdateUser
+          }
+      }
+      serialize_size += unknownFields.serializedSize()
+      memoizedSerializedSize = serialize_size
+      return serialize_size
+    }
+    public class func parseArrayDelimitedFromInputStream(input:NSInputStream) throws -> Array<HseMsg.Event> {
+      var mergedArray = Array<HseMsg.Event>()
+      while let value = try parseFromDelimitedFromInputStream(input) {
+        mergedArray += [value]
+      }
+      return mergedArray
+    }
+    public class func parseFromDelimitedFromInputStream(input:NSInputStream) throws -> HseMsg.Event? {
+      return try HseMsg.Event.Builder().mergeDelimitedFromInputStream(input)?.build()
+    }
+    public class func parseFromData(data:NSData) throws -> HseMsg.Event {
+      return try HseMsg.Event.Builder().mergeFromData(data, extensionRegistry:HseMsg.HseMsgRoot.sharedInstance.extensionRegistry).build()
+    }
+    public class func parseFromData(data:NSData, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event {
+      return try HseMsg.Event.Builder().mergeFromData(data, extensionRegistry:extensionRegistry).build()
+    }
+    public class func parseFromInputStream(input:NSInputStream) throws -> HseMsg.Event {
+      return try HseMsg.Event.Builder().mergeFromInputStream(input).build()
+    }
+    public class func parseFromInputStream(input:NSInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event {
+      return try HseMsg.Event.Builder().mergeFromInputStream(input, extensionRegistry:extensionRegistry).build()
+    }
+    public class func parseFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.Event {
+      return try HseMsg.Event.Builder().mergeFromCodedInputStream(input).build()
+    }
+    public class func parseFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event {
+      return try HseMsg.Event.Builder().mergeFromCodedInputStream(input, extensionRegistry:extensionRegistry).build()
+    }
+    public class func getBuilder() -> HseMsg.Event.Builder {
+      return HseMsg.Event.classBuilder() as! HseMsg.Event.Builder
+    }
+    public func getBuilder() -> HseMsg.Event.Builder {
+      return classBuilder() as! HseMsg.Event.Builder
+    }
+    public override class func classBuilder() -> MessageBuilder {
+      return HseMsg.Event.Builder()
+    }
+    public override func classBuilder() -> MessageBuilder {
+      return HseMsg.Event.Builder()
+    }
+    public func toBuilder() throws -> HseMsg.Event.Builder {
+      return try HseMsg.Event.builderWithPrototype(self)
+    }
+    public class func builderWithPrototype(prototype:HseMsg.Event) throws -> HseMsg.Event.Builder {
+      return try HseMsg.Event.Builder().mergeFrom(prototype)
+    }
+    override public func getDescription(indent:String) throws -> String {
+      var output:String = ""
+      if hasNewMessage {
+        output += "\(indent) newMessage {\n"
+        if let outDescNewMessage = newMessage {
+          output += try outDescNewMessage.getDescription("\(indent)  ")
+        }
+        output += "\(indent) }\n"
+      }
+      if hasNewUser {
+        output += "\(indent) newUser {\n"
+        if let outDescNewUser = newUser {
+          output += try outDescNewUser.getDescription("\(indent)  ")
+        }
+        output += "\(indent) }\n"
+      }
+      if hasUpdateUser {
+        output += "\(indent) updateUser {\n"
+        if let outDescUpdateUser = updateUser {
+          output += try outDescUpdateUser.getDescription("\(indent)  ")
+        }
+        output += "\(indent) }\n"
+      }
+      output += unknownFields.getDescription(indent)
+      return output
+    }
+    override public var hashValue:Int {
+        get {
+            var hashCode:Int = 7
+            if hasNewMessage {
+                if let hashValuenewMessage = newMessage?.hashValue {
+                    hashCode = (hashCode &* 31) &+ hashValuenewMessage
+                }
+            }
+            if hasNewUser {
+                if let hashValuenewUser = newUser?.hashValue {
+                    hashCode = (hashCode &* 31) &+ hashValuenewUser
+                }
+            }
+            if hasUpdateUser {
+                if let hashValueupdateUser = updateUser?.hashValue {
+                    hashCode = (hashCode &* 31) &+ hashValueupdateUser
+                }
+            }
+            hashCode = (hashCode &* 31) &+  unknownFields.hashValue
+            return hashCode
+        }
+    }
+
+
+    //Meta information declaration start
+
+    override public class func className() -> String {
+        return "HseMsg.Event"
+    }
+    override public func className() -> String {
+        return "HseMsg.Event"
+    }
+    override public func classMetaType() -> GeneratedMessage.Type {
+        return HseMsg.Event.self
+    }
+    //Meta information declaration end
+
+    final public class Builder : GeneratedMessageBuilder {
+      private var builderResult:HseMsg.Event = HseMsg.Event()
+      public func getMessage() -> HseMsg.Event {
+          return builderResult
+      }
+
+      required override public init () {
+         super.init()
+      }
+      public var hasNewMessage:Bool {
+           get {
+               return builderResult.hasNewMessage
+           }
+      }
+      public var newMessage:HseMsg.Event.NewMessage! {
+           get {
+               if newMessageBuilder_ != nil {
+                  builderResult.newMessage = newMessageBuilder_.getMessage()
+               }
+               return builderResult.newMessage
+           }
+           set (value) {
+               builderResult.hasNewMessage = true
+               builderResult.newMessage = value
+           }
+      }
+      private var newMessageBuilder_:HseMsg.Event.NewMessage.Builder! {
+           didSet {
+              builderResult.hasNewMessage = true
+           }
+      }
+      public func getNewMessageBuilder() -> HseMsg.Event.NewMessage.Builder {
+        if newMessageBuilder_ == nil {
+           newMessageBuilder_ = HseMsg.Event.NewMessage.Builder()
+           builderResult.newMessage = newMessageBuilder_.getMessage()
+           if newMessage != nil {
+              try! newMessageBuilder_.mergeFrom(newMessage)
+           }
+        }
+        return newMessageBuilder_
+      }
+      public func setNewMessage(value:HseMsg.Event.NewMessage!) -> HseMsg.Event.Builder {
+        self.newMessage = value
+        return self
+      }
+      public func mergeNewMessage(value:HseMsg.Event.NewMessage) throws -> HseMsg.Event.Builder {
+        if builderResult.hasNewMessage {
+          builderResult.newMessage = try HseMsg.Event.NewMessage.builderWithPrototype(builderResult.newMessage).mergeFrom(value).buildPartial()
+        } else {
+          builderResult.newMessage = value
+        }
+        builderResult.hasNewMessage = true
+        return self
+      }
+      public func clearNewMessage() -> HseMsg.Event.Builder {
+        newMessageBuilder_ = nil
+        builderResult.hasNewMessage = false
+        builderResult.newMessage = nil
+        return self
+      }
+      public var hasNewUser:Bool {
+           get {
+               return builderResult.hasNewUser
+           }
+      }
+      public var newUser:HseMsg.Event.NewUser! {
+           get {
+               if newUserBuilder_ != nil {
+                  builderResult.newUser = newUserBuilder_.getMessage()
+               }
+               return builderResult.newUser
+           }
+           set (value) {
+               builderResult.hasNewUser = true
+               builderResult.newUser = value
+           }
+      }
+      private var newUserBuilder_:HseMsg.Event.NewUser.Builder! {
+           didSet {
+              builderResult.hasNewUser = true
+           }
+      }
+      public func getNewUserBuilder() -> HseMsg.Event.NewUser.Builder {
+        if newUserBuilder_ == nil {
+           newUserBuilder_ = HseMsg.Event.NewUser.Builder()
+           builderResult.newUser = newUserBuilder_.getMessage()
+           if newUser != nil {
+              try! newUserBuilder_.mergeFrom(newUser)
+           }
+        }
+        return newUserBuilder_
+      }
+      public func setNewUser(value:HseMsg.Event.NewUser!) -> HseMsg.Event.Builder {
+        self.newUser = value
+        return self
+      }
+      public func mergeNewUser(value:HseMsg.Event.NewUser) throws -> HseMsg.Event.Builder {
+        if builderResult.hasNewUser {
+          builderResult.newUser = try HseMsg.Event.NewUser.builderWithPrototype(builderResult.newUser).mergeFrom(value).buildPartial()
+        } else {
+          builderResult.newUser = value
+        }
+        builderResult.hasNewUser = true
+        return self
+      }
+      public func clearNewUser() -> HseMsg.Event.Builder {
+        newUserBuilder_ = nil
+        builderResult.hasNewUser = false
+        builderResult.newUser = nil
+        return self
+      }
+      public var hasUpdateUser:Bool {
+           get {
+               return builderResult.hasUpdateUser
+           }
+      }
+      public var updateUser:HseMsg.Event.UpdateUser! {
+           get {
+               if updateUserBuilder_ != nil {
+                  builderResult.updateUser = updateUserBuilder_.getMessage()
+               }
+               return builderResult.updateUser
+           }
+           set (value) {
+               builderResult.hasUpdateUser = true
+               builderResult.updateUser = value
+           }
+      }
+      private var updateUserBuilder_:HseMsg.Event.UpdateUser.Builder! {
+           didSet {
+              builderResult.hasUpdateUser = true
+           }
+      }
+      public func getUpdateUserBuilder() -> HseMsg.Event.UpdateUser.Builder {
+        if updateUserBuilder_ == nil {
+           updateUserBuilder_ = HseMsg.Event.UpdateUser.Builder()
+           builderResult.updateUser = updateUserBuilder_.getMessage()
+           if updateUser != nil {
+              try! updateUserBuilder_.mergeFrom(updateUser)
+           }
+        }
+        return updateUserBuilder_
+      }
+      public func setUpdateUser(value:HseMsg.Event.UpdateUser!) -> HseMsg.Event.Builder {
+        self.updateUser = value
+        return self
+      }
+      public func mergeUpdateUser(value:HseMsg.Event.UpdateUser) throws -> HseMsg.Event.Builder {
+        if builderResult.hasUpdateUser {
+          builderResult.updateUser = try HseMsg.Event.UpdateUser.builderWithPrototype(builderResult.updateUser).mergeFrom(value).buildPartial()
+        } else {
+          builderResult.updateUser = value
+        }
+        builderResult.hasUpdateUser = true
+        return self
+      }
+      public func clearUpdateUser() -> HseMsg.Event.Builder {
+        updateUserBuilder_ = nil
+        builderResult.hasUpdateUser = false
+        builderResult.updateUser = nil
+        return self
+      }
+      override public var internalGetResult:GeneratedMessage {
+           get {
+              return builderResult
+           }
+      }
+      public override func clear() -> HseMsg.Event.Builder {
+        builderResult = HseMsg.Event()
+        return self
+      }
+      public override func clone() throws -> HseMsg.Event.Builder {
+        return try HseMsg.Event.builderWithPrototype(builderResult)
+      }
+      public override func build() throws -> HseMsg.Event {
+           try checkInitialized()
+           return buildPartial()
+      }
+      public func buildPartial() -> HseMsg.Event {
+        let returnMe:HseMsg.Event = builderResult
+        return returnMe
+      }
+      public func mergeFrom(other:HseMsg.Event) throws -> HseMsg.Event.Builder {
+        if other == HseMsg.Event() {
+         return self
+        }
+        if (other.hasNewMessage) {
+            try mergeNewMessage(other.newMessage)
+        }
+        if (other.hasNewUser) {
+            try mergeNewUser(other.newUser)
+        }
+        if (other.hasUpdateUser) {
+            try mergeUpdateUser(other.updateUser)
+        }
+        try mergeUnknownFields(other.unknownFields)
+        return self
+      }
+      public override func mergeFromCodedInputStream(input:CodedInputStream) throws -> HseMsg.Event.Builder {
+           return try mergeFromCodedInputStream(input, extensionRegistry:ExtensionRegistry())
+      }
+      public override func mergeFromCodedInputStream(input:CodedInputStream, extensionRegistry:ExtensionRegistry) throws -> HseMsg.Event.Builder {
+        let unknownFieldsBuilder:UnknownFieldSet.Builder = try UnknownFieldSet.builderWithUnknownFields(self.unknownFields)
+        while (true) {
+          let protobufTag = try input.readTag()
+          switch protobufTag {
+          case 0: 
+            self.unknownFields = try unknownFieldsBuilder.build()
+            return self
+
+          case 10 :
+            let subBuilder:HseMsg.Event.NewMessage.Builder = HseMsg.Event.NewMessage.Builder()
+            if hasNewMessage {
+              try subBuilder.mergeFrom(newMessage)
+            }
+            try input.readMessage(subBuilder, extensionRegistry:extensionRegistry)
+            newMessage = subBuilder.buildPartial()
+
+          case 18 :
+            let subBuilder:HseMsg.Event.NewUser.Builder = HseMsg.Event.NewUser.Builder()
+            if hasNewUser {
+              try subBuilder.mergeFrom(newUser)
+            }
+            try input.readMessage(subBuilder, extensionRegistry:extensionRegistry)
+            newUser = subBuilder.buildPartial()
+
+          case 26 :
+            let subBuilder:HseMsg.Event.UpdateUser.Builder = HseMsg.Event.UpdateUser.Builder()
+            if hasUpdateUser {
+              try subBuilder.mergeFrom(updateUser)
+            }
+            try input.readMessage(subBuilder, extensionRegistry:extensionRegistry)
+            updateUser = subBuilder.buildPartial()
+
+          default:
+            if (!(try parseUnknownField(input,unknownFields:unknownFieldsBuilder, extensionRegistry:extensionRegistry, tag:protobufTag))) {
+               unknownFields = try unknownFieldsBuilder.build()
+               return self
+            }
+          }
+        }
+      }
+    }
+
+  }
+
+  final public class ServerMessage : GeneratedMessage, GeneratedMessageProtocol {
+
+
+    //OneOf declaration start
+
     public enum Message_ {
       case Message_OneOfNotSet
 
@@ -5523,9 +5938,9 @@ public extension HseMsg {
                 return true
            }
       }
-      case Event(HseMsg.ServerMessage.Event)
+      case Event(HseMsg.Event)
 
-      public static func getEvent(value:Message_) -> HseMsg.ServerMessage.Event? {
+      public static func getEvent(value:Message_) -> HseMsg.Event? {
            switch value {
            case .Event(let enumValue):
                 return enumValue
@@ -5547,7 +5962,7 @@ public extension HseMsg {
     //OneOf declaration end
 
     private var storageMessage_:ServerMessage.Message_ =  ServerMessage.Message_.Message_OneOfNotSet
-    public private(set) var event:HseMsg.ServerMessage.Event!{
+    public private(set) var event:HseMsg.Event!{
          get {
               return ServerMessage.Message_.getEvent(storageMessage_)
          }
@@ -5740,7 +6155,7 @@ public extension HseMsg {
                return builderResult.hasEvent
            }
       }
-      public var event:HseMsg.ServerMessage.Event! {
+      public var event:HseMsg.Event! {
            get {
                if eventBuilder_ != nil {
                   builderResult.event = eventBuilder_.getMessage()
@@ -5752,14 +6167,14 @@ public extension HseMsg {
                builderResult.event = value
            }
       }
-      private var eventBuilder_:HseMsg.ServerMessage.Event.Builder! {
+      private var eventBuilder_:HseMsg.Event.Builder! {
            didSet {
               builderResult.hasEvent = true
            }
       }
-      public func getEventBuilder() -> HseMsg.ServerMessage.Event.Builder {
+      public func getEventBuilder() -> HseMsg.Event.Builder {
         if eventBuilder_ == nil {
-           eventBuilder_ = HseMsg.ServerMessage.Event.Builder()
+           eventBuilder_ = HseMsg.Event.Builder()
            builderResult.event = eventBuilder_.getMessage()
            if event != nil {
               try! eventBuilder_.mergeFrom(event)
@@ -5767,13 +6182,13 @@ public extension HseMsg {
         }
         return eventBuilder_
       }
-      public func setEvent(value:HseMsg.ServerMessage.Event!) -> HseMsg.ServerMessage.Builder {
+      public func setEvent(value:HseMsg.Event!) -> HseMsg.ServerMessage.Builder {
         self.event = value
         return self
       }
-      public func mergeEvent(value:HseMsg.ServerMessage.Event) throws -> HseMsg.ServerMessage.Builder {
+      public func mergeEvent(value:HseMsg.Event) throws -> HseMsg.ServerMessage.Builder {
         if builderResult.hasEvent {
-          builderResult.event = try HseMsg.ServerMessage.Event.builderWithPrototype(builderResult.event).mergeFrom(value).buildPartial()
+          builderResult.event = try HseMsg.Event.builderWithPrototype(builderResult.event).mergeFrom(value).buildPartial()
         } else {
           builderResult.event = value
         }
@@ -5883,7 +6298,7 @@ public extension HseMsg {
             return self
 
           case 10 :
-            let subBuilder:HseMsg.ServerMessage.Event.Builder = HseMsg.ServerMessage.Event.Builder()
+            let subBuilder:HseMsg.Event.Builder = HseMsg.Event.Builder()
             if hasEvent {
               try subBuilder.mergeFrom(event)
             }

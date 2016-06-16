@@ -17,6 +17,7 @@
 		882D3EB11D10999F00626308 /* ContactsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 882D3EB01D10999F00626308 /* ContactsViewController.swift */; };
 		883CAF601D11AE020062C062 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 883CAF5F1D11AE020062C062 /* DataManager.swift */; };
 		889083B31D131DF20064796D /* ChunkedConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 889083B21D131DF20064796D /* ChunkedConnection.swift */; };
+		889083BB1D135E1F0064796D /* ContactCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 889083BA1D135E1F0064796D /* ContactCell.swift */; };
 		88FB56E21D10C7EE00981A02 /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FB56E11D10C7EE00981A02 /* MessagesViewController.swift */; };
 		88FB56F31D10D38D00981A02 /* protoFiles in Resources */ = {isa = PBXBuildFile; fileRef = 88FB56F21D10D38D00981A02 /* protoFiles */; };
 		C2D07C9AEF841C93FC7AE231 /* Pods_HseChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6757EED719212AB148747DC9 /* Pods_HseChat.framework */; };
@@ -81,6 +82,7 @@
 		882D3EB01D10999F00626308 /* ContactsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactsViewController.swift; sourceTree = "<group>"; };
 		883CAF5F1D11AE020062C062 /* DataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		889083B21D131DF20064796D /* ChunkedConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChunkedConnection.swift; sourceTree = "<group>"; };
+		889083BA1D135E1F0064796D /* ContactCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactCell.swift; sourceTree = "<group>"; };
 		88FB56DD1D10C79300981A02 /* HseChat-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "HseChat-Bridging-Header.h"; sourceTree = "<group>"; };
 		88FB56E11D10C7EE00981A02 /* MessagesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagesViewController.swift; sourceTree = "<group>"; };
 		88FB56E31D10C9FB00981A02 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 				882D3EA81D101C8D00626308 /* Info.plist */,
 				882D3EB01D10999F00626308 /* ContactsViewController.swift */,
 				88FB56E11D10C7EE00981A02 /* MessagesViewController.swift */,
+				889083BA1D135E1F0064796D /* ContactCell.swift */,
 			);
 			name = HseChat;
 			path = MyChat;
@@ -362,6 +365,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				889083BB1D135E1F0064796D /* ContactCell.swift in Sources */,
 				88FB56E21D10C7EE00981A02 /* MessagesViewController.swift in Sources */,
 				882D3E9F1D101C8D00626308 /* LoginViewController.swift in Sources */,
 				880D884D1D113E2E00DBD9F2 /* HseMsg.HseMsg.proto.swift in Sources */,

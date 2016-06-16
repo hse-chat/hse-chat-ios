@@ -39,6 +39,7 @@ class ChunkedConnection {
         print ("[ChunckedConnection]: Disconnecting...")
         do {
             try client.disconnect()
+            self.isConnected = false
         } catch {
             print("[ChunckedConnection] Error while disconnecting")
         }
@@ -98,6 +99,9 @@ class ChunkedConnection {
                     NSNotificationCenter.defaultCenter().postNotificationName("newMessage", object: serverMessage.event.newMessage.message_)
                 } else if serverMessage.event.hasNewUser {
                     NSNotificationCenter.defaultCenter().postNotificationName("newUser", object: serverMessage.event.newUser.user)
+                } else if serverMessage.event.hasUpdateUser {
+                    NSNotificationCenter.defaultCenter().postNotificationName("userUpdated", object: serverMessage.event.updateUser.user)
+                    
                 }
             }
             
