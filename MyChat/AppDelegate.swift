@@ -38,6 +38,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillTerminate(application: UIApplication) {
+        ConnectionManager.sharedInstance.disconnect()
     }
 
 
